@@ -24,7 +24,9 @@ export default () => ({
     privateKey: process.env.HEDERA_PRIVATE_KEY ?? '',
     treasuryAccountId: process.env.HEDERA_TREASURY_ACCOUNT_ID ?? '',
     treasuryPrivateKey: process.env.HEDERA_TREASURY_PRIVATE_KEY ?? '',
-    nftTokenId: process.env.HEDERA_NFT_TOKEN_ID ?? ''
+    nftTokenId: process.env.HEDERA_NFT_TOKEN_ID ?? '',
+    mintMaxAttempts: parseInt(process.env.HEDERA_MINT_MAX_ATTEMPTS ?? '3', 10),
+    retryDelayMs: parseInt(process.env.HEDERA_RETRY_DELAY_MS ?? '1000', 10)
   },
   ipfs: {
     pinataApiKey: process.env.PINATA_API_KEY ?? '',
