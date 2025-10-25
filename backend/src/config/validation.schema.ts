@@ -18,8 +18,8 @@ export const validationSchema = Joi.object({
   HEDERA_TREASURY_ACCOUNT_ID: Joi.string().required(),
   HEDERA_TREASURY_PRIVATE_KEY: Joi.string().required(),
   HEDERA_NFT_TOKEN_ID: Joi.string().required(),
-  HEDERA_MINT_MAX_ATTEMPTS: Joi.number().integer().min(1).default(3),
-  HEDERA_RETRY_DELAY_MS: Joi.number().integer().min(0).default(1000),
+  HEDERA_MINT_MAX_ATTEMPTS: Joi.number().integer().min(1).default(2),
+  HEDERA_RETRY_DELAY_MS: Joi.number().integer().min(0).default(250),
   PINATA_API_KEY: Joi.string().required(),
   PINATA_SECRET_API_KEY: Joi.string().required()
 });

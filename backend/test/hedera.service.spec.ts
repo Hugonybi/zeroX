@@ -41,7 +41,7 @@ function createConfigService(overrides: Record<string, unknown> = {}): ConfigSer
     'hedera.accountId': '0.0.1001',
     'hedera.privateKey': '302e020100300506032b657004220420test-private-key',
     'hedera.treasuryPrivateKey': '302e020100300506032b657004220420test-treasury-key',
-    'hedera.mintMaxAttempts': 3,
+    'hedera.mintMaxAttempts': 2,
     'hedera.retryDelayMs': 0
   };
 
