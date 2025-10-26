@@ -4,6 +4,11 @@ import { Button } from "../components/ui/Button";
 import { SelectField } from "../components/ui/SelectField";
 import { TextArea } from "../components/ui/TextArea";
 import { TextField } from "../components/ui/TextField";
+import { Toast } from "../components/ui/Toast";
+import { useToast } from "../hooks/useToast";
+import { useCreateArtwork } from "../hooks/useCreateArtwork";
+import { azureStorage } from "../lib/azureStorage";
+import { mapFormToCreatePayload } from "../features/artists/mappers";
 
 type StepId = "details" | "media" | "pricing";
 
@@ -73,7 +78,12 @@ export function ArtistsPage() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [formState, setFormState] = useState<ArtworkFormState>(initialForm);
   const [assetPreviewUrl, setAssetPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { toast, showToast } = useToast();
+  const { mutate: createArtwork, status: createStatus, error: createError } = useCreateArtwork();
 
   useEffect(() => {
     return () => {
@@ -105,6 +115,7 @@ export function ArtistsPage() {
       return;
     }
 
+    setSelectedFile(file);
     setFormState((previous) => ({ ...previous, fileName: file.name }));
 
     setAssetPreviewUrl((previousUrl) => {
@@ -119,6 +130,7 @@ export function ArtistsPage() {
   };
 
   const clearAsset = () => {
+    setSelectedFile(null);
     setFormState((previous) => ({ ...previous, fileName: "" }));
     setAssetPreviewUrl((previousUrl) => {
       if (previousUrl) {
@@ -183,15 +195,44 @@ export function ArtistsPage() {
     setHasSubmitted(false);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isPricingValid) {
+    if (!isPricingValid || !selectedFile) {
+      showToast({
+        message: "Please complete all required fields and upload artwork media.",
+        variant: "error",
+      });
       return;
     }
 
-    setHasSubmitted(true);
-    setActiveStepIndex(steps.length - 1);
+    setIsUploading(true);
+
+    try {
+      const uploadResult = await azureStorage.uploadFile(selectedFile);
+      const payload = mapFormToCreatePayload(formState, uploadResult.url);
+
+      await createArtwork(payload);
+
+      setHasSubmitted(true);
+      setActiveStepIndex(steps.length - 1);
+      setFormState(initialForm);
+      setSelectedFile(null);
+      setAssetPreviewUrl(null);
+
+      showToast({
+        message: "Artwork published successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Failed to create artwork", error);
+      showToast({
+        message: createError?.message ?? "Failed to publish artwork. Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const progressPercentage = hasSubmitted
@@ -512,7 +553,7 @@ export function ArtistsPage() {
               Back
             </Button>
             {currentStep.id === "pricing" ? (
-              <Button type="submit" disabled={!isCurrentStepValid || hasSubmitted}>
+              <Button type="submit" disabled={!isCurrentStepValid || hasSubmitted || isUploading || createStatus === "pending"} loading={isUploading || createStatus === "pending"}>
                 {hasSubmitted ? "Listing saved" : "Publish listing"}
               </Button>
             ) : (
@@ -584,6 +625,8 @@ export function ArtistsPage() {
           </div>
         </div>
       </aside>
+
+      {toast && <Toast {...toast} />}
     </section>
   );
 }

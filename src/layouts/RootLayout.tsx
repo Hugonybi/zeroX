@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { SiteHeader } from "../components/SiteHeader";
+import { DevAuthBanner } from "../components/DevAuthBanner";
 
 export function RootLayout() {
   return (
@@ -11,6 +12,8 @@ export function RootLayout() {
           <Outlet />
         </main>
       </div>
+      
+      <DevAuthBanner />
     </div>
   );
 }
