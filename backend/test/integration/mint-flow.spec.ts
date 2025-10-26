@@ -48,11 +48,11 @@ jest.mock('@hashgraph/sdk', () => {
 const hashgraphMock = jest.requireMock('@hashgraph/sdk') as HashgraphMock;
 
 class FakePrismaService {
-  private artworks = new Map<string, any>();
-  private users = new Map<string, any>();
-  private ordersById = new Map<string, any>();
-  private ordersByReference = new Map<string, any>();
-  public authTokens: any[] = [];
+  private artworks = new Map<string, Record<string, unknown>>();
+  private users = new Map<string, Record<string, unknown>>();
+  private ordersById = new Map<string, Record<string, unknown>>();
+  private ordersByReference = new Map<string, Record<string, unknown>>();
+  public authTokens: Array<Record<string, unknown>> = [];
 
   constructor() {
     this.artworks.set('art-1', {
@@ -78,8 +78,8 @@ class FakePrismaService {
   };
 
   order = {
-    create: jest.fn(async ({ data }: { data: any }) => {
-      const id = data.id ?? `order-${this.ordersById.size + 1}`;
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
+      const id = (data.id as string) ?? `order-${this.ordersById.size + 1}`;
       const record = {
         id,
         reference: data.reference,
@@ -92,17 +92,17 @@ class FakePrismaService {
         orderStatus: data.orderStatus ?? 'created'
       };
       this.ordersById.set(record.id, record);
-      this.ordersByReference.set(record.reference, record);
+      this.ordersByReference.set(record.reference as string, record);
       return { ...record };
     }),
-    update: jest.fn(async ({ where, data }: { where: { id?: string; reference?: string }; data: any }) => {
+    update: jest.fn(async ({ where, data }: { where: { id?: string; reference?: string }; data: Record<string, unknown> }) => {
       const order = where.id ? this.ordersById.get(where.id) : this.ordersByReference.get(where.reference ?? '');
       if (!order) {
         throw new Error('Order not found');
       }
       Object.assign(order, data);
       if (data.reference) {
-        this.ordersByReference.set(order.reference, order);
+        this.ordersByReference.set(order.reference as string, order);
       }
       return { ...order };
     }),
@@ -118,8 +118,8 @@ class FakePrismaService {
   };
 
   authToken = {
-    create: jest.fn(async ({ data }: { data: any }) => {
-      const record = { id: data.id ?? `auth-${this.authTokens.length + 1}`, ...data };
+    create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
+      const record = { id: (data.id as string) ?? `auth-${this.authTokens.length + 1}`, ...data };
       this.authTokens.push(record);
       return record;
     })
@@ -143,11 +143,9 @@ class FakeQueue {
 
   constructor(private readonly worker: MintAuthenticityWorker) {}
 
-  // The Queue interface has many members; implement the ones we need for this test.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async add(name: string, payload: MintJobPayload, options?: Record<string, unknown>) {
     this.addedJobs.push({ name, payload, options });
-    const job = { data: payload } as any;
+    const job = { data: payload } as unknown as Parameters<typeof this.worker.process>[0];
     return this.worker.process(job);
   }
 
@@ -178,12 +176,16 @@ function setupTestEnvironment(configOverrides: Record<string, unknown> = {}) {
   const pinataService = new FakePinataService();
   const worker = new MintAuthenticityWorker(
     hederaService,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pinataService as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     prisma as any,
     configService
   );
   const queue = new FakeQueue(worker);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const queueService = new QueueService(queue as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ordersService = new OrdersService(prisma as any, paystack as any);
 
   return {
