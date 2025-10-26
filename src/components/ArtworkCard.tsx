@@ -18,11 +18,11 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
         )}
       </div>
       <header className="space-y-1">
-        <h3 className="max-w-xs text-lg font-semibold text-ink">
+        <h3 className="max-w-xs text-base font-semibold text-ink">
           {title}
         </h3>
         <p className="text-sm text-ink-muted">by {artist}</p>
-        <p className="text-base font-semibold text-ink">{price}</p>
+        <p className="text-base text-black/70 font-semibold text-ink">{price}</p>
       </header>
     </article>
   );
