@@ -1,15 +1,53 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/Button";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+
 export function DevAuthBanner() {
   const [token, setToken] = useState<string | null>(null);
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     setToken(storedToken);
   }, []);
+
+  const handleAutoGenerate = async () => {
+    setIsGenerating(true);
+    setError(null);
+    
+    try {
+      // Register a test artist account
+      const response = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `artist-${Date.now()}@test.com`,
+          password: 'Test123!@#',
+          name: 'Dev Test Artist',
+          role: 'artist',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate token');
+      }
+
+      const data = await response.json();
+      const newToken = data.accessToken;
+      
+      localStorage.setItem("auth_token", newToken);
+      setToken(newToken);
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate token');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleSetToken = () => {
     if (inputValue.trim()) {
@@ -48,7 +86,10 @@ export function DevAuthBanner() {
             </>
           ) : (
             <>
-              <p className="text-amber-700">No auth token set. Run test script to get one.</p>
+              <p className="text-amber-700">No auth token set.</p>
+              {error && (
+                <p className="text-red-600 text-xs">❌ {error}</p>
+              )}
               {showInput ? (
                 <div className="space-y-2">
                   <input
@@ -68,17 +109,24 @@ export function DevAuthBanner() {
                   </div>
                 </div>
               ) : (
-                <Button variant="secondary" size="sm" onClick={() => setShowInput(true)}>
-                  Set Token
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    onClick={handleAutoGenerate}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? "Generating..." : "Auto-Generate Token"}
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => setShowInput(true)}>
+                    Manual
+                  </Button>
+                </div>
               )}
             </>
           )}
-          <p className="text-amber-600">
-            Run: <code className="rounded bg-amber-100 px-1">node test-artwork-flow.js</code>
-          </p>
           <p className="text-xs text-amber-600">
-            💡 Azure CORS errors are normal - stub URLs work fine for testing
+            💡 Click Auto-Generate to create a test artist account automatically
           </p>
         </div>
       </div>

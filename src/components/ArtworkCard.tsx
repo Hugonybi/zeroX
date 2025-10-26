@@ -12,7 +12,7 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
         {imageUrl ? (
           <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone/40 via-white to-stone">
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-stone/40 via-white to-stone">
             <span className="font-brand text-xl uppercase tracking-widest text-ink/40">Artwork</span>
           </div>
         )}
