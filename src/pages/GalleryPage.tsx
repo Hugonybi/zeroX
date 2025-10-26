@@ -1,12 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { GalleryHero } from "../components/GalleryHero";
 import { mockArtworks } from "../data/mockArtworks";
+import { Button } from "../components/ui/Button";
 
 export function GalleryPage() {
+  const navigate = useNavigate();
+
   return (
     <section className="space-y-10">
-      <GalleryHero />
+      <div className="space-y-6">
+        <GalleryHero />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button onClick={() => navigate("/artists")}>Post artwork</Button>
+          <span className="text-xs uppercase tracking-[0.35em] text-ink-muted">
+            Share your next release with provenance built in.
+          </span>
+        </div>
+      </div>
 
       <div className="grid  gap-10 sm:grid-cols-2 xl:grid-cols-4">
         {mockArtworks.map((artwork) => (
