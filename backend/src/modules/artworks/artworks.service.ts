@@ -112,4 +112,12 @@ export class ArtworksService {
     const artworks = await this.prisma.artwork.findMany({ where, orderBy: { createdAt: 'desc' } });
     return artworks.map(artwork => this.transformArtwork(artwork));
   }
+
+  async findPublishedById(id: string) {
+    const artwork = await this.prisma.artwork.findUnique({ where: { id, status: ArtworkStatus.published } });
+    if (!artwork) {
+      throw new NotFoundException('Artwork not found');
+    }
+    return this.transformArtwork(artwork);
+  }
 }

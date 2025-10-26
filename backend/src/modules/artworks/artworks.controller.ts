@@ -49,4 +49,9 @@ export class MarketplaceController {
       maxPrice: maxPrice ? Number(maxPrice) : undefined
     });
   }
+
+  @Get(':id')
+  find(@Param('id') id: string) {
+    return this.artworksService.findPublishedById(id);
+  }
 }
