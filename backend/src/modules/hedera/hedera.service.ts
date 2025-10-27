@@ -22,6 +22,7 @@ export class HederaService {
     }
 
     this.client = Client.forTestnet();
+    // Use fromString() to auto-detect key type (ED25519 or ECDSA)
     this.client.setOperator(accountId, PrivateKey.fromString(privateKey));
     this.treasuryKey = PrivateKey.fromString(treasuryKey);
   }

@@ -5,6 +5,7 @@ import { QueueService } from './queue.service';
 import { MintAuthenticityWorker } from '../workers/mint-authenticity.worker';
 import { HederaModule } from '../modules/hedera/hedera.module';
 import { PinataModule } from '../modules/pinata/pinata.module';
+import { TokenizationModule } from '../modules/tokenization/tokenization.module';
 import { PrismaModule } from '../modules/prisma/prisma.module';
 
 @Module({
@@ -25,7 +26,8 @@ import { PrismaModule } from '../modules/prisma/prisma.module';
     }),
     PrismaModule,
     HederaModule,
-    PinataModule
+    PinataModule,
+    TokenizationModule
   ],
   providers: [QueueService, MintAuthenticityWorker],
   exports: [QueueService, BullModule]

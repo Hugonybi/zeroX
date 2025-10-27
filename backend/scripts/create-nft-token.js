@@ -38,7 +38,17 @@ async function createNftToken() {
   }
 
   const client = Client.forTestnet();
-  const operatorKey = PrivateKey.fromStringECDSA(privateKey);
+  
+  // Use fromString() instead of fromStringECDSA() to auto-detect key type
+  let operatorKey;
+  try {
+    operatorKey = PrivateKey.fromString(privateKey);
+  } catch (error) {
+    console.error('Failed to parse private key. Make sure it is in the correct format.');
+    console.error('Expected format: 302e020100300506032b657004220420...');
+    process.exit(1);
+  }
+  
   client.setOperator(accountId, operatorKey);
 
   console.log('Creating NFT token on Hedera testnet...');

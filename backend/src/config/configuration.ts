@@ -26,6 +26,7 @@ export default () => ({
     treasuryAccountId: process.env.HEDERA_TREASURY_ACCOUNT_ID ?? '',
     treasuryPrivateKey: process.env.HEDERA_TREASURY_PRIVATE_KEY ?? '',
     nftTokenId: process.env.HEDERA_NFT_TOKEN_ID ?? '',
+    ownershipTokenId: process.env.HEDERA_OWNERSHIP_TOKEN_ID ?? '',
     mintMaxAttempts: parseInt(process.env.HEDERA_MINT_MAX_ATTEMPTS ?? '2', 10),
     retryDelayMs: parseInt(process.env.HEDERA_RETRY_DELAY_MS ?? '250', 10)
   },
