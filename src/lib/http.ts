@@ -89,8 +89,8 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 		return JSON.stringify(body);
 	};
 
-		const send = async <TResponse>(method: string, path: string, body?: unknown, init: RequestInit = {}) => {
-			const headers = await buildHeaders(init.headers);
+	const send = async <TResponse>(method: string, path: string, body?: unknown, init: RequestInit = {}, isRetry = false) => {
+		const headers = await buildHeaders(init.headers);
 			if (!headers.has("accept")) {
 				headers.set("accept", "application/json");
 			}
@@ -114,23 +114,26 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 
 			let response = await fetch(url, requestInit);
 
-			// Handle 401 - try to refresh token once
-			if (response.status === 401) {
-				try {
-					// Attempt to refresh the session
-					await fetch(`${trimmedBaseUrl}/auth/refresh`, {
-						method: 'POST',
-						credentials: 'include',
-					});
-					// Retry the original request
+		// Handle 401 - try to refresh token once (prevent infinite loop)
+		// Skip retry if: already retrying, or if this IS the refresh endpoint
+		if (response.status === 401 && !isRetry && !path.includes('/auth/refresh')) {
+			try {
+				// Attempt to refresh the session
+				const refreshResponse = await fetch(`${trimmedBaseUrl}/auth/refresh`, {
+					method: 'POST',
+					credentials: 'include',
+				});
+				
+				// Only retry if refresh was successful
+				if (refreshResponse.ok) {
+					// Retry the original request once
 					response = await fetch(url, requestInit);
-				} catch (refreshError) {
-					// Refresh failed, continue with original 401 response
-					console.warn('Token refresh failed:', refreshError);
 				}
+			} catch (refreshError) {
+				// Refresh failed, continue with original 401 response
+				console.warn('Token refresh failed:', refreshError);
 			}
-
-			options.onResponse?.(response);
+		}			options.onResponse?.(response);
 
 			if (!response.ok) {
 				const errorBody = await resolveJson(response);

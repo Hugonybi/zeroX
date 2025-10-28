@@ -1,5 +1,6 @@
 import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { UserRole } from '@prisma/client';
+import { IsStrongPassword } from '@common/decorators/is-strong-password.decorator';
 
 export class RegisterDto {
   @IsEmail()
@@ -7,6 +8,7 @@ export class RegisterDto {
 
   @IsString()
   @MinLength(8)
+  @IsStrongPassword()
   password!: string;
 
   @IsString()
