@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface ArtworkCardProps {
   title: string;
   artist: string;
@@ -6,15 +8,23 @@ interface ArtworkCardProps {
 }
 
 export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const showPlaceholder = !imageUrl || imageError;
+
   return (
     <article className="flex flex-col gap-4">
       <div className="aspect-ratio[4/5] h-80 w-full max-w-sm overflow-hidden rounded-2xl bg-stone/40 shadow-brand">
-        {imageUrl ? (
-          <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-stone/40 via-white to-stone">
+        {showPlaceholder ? (
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-stone/60 via-stone/30 to-white">
             <span className="font-brand text-xl uppercase tracking-widest text-ink/40">Artwork</span>
           </div>
+        ) : (
+          <img 
+            src={imageUrl} 
+            alt={title} 
+            className="h-full w-full object-cover"
+            onError={() => setImageError(true)}
+          />
         )}
       </div>
       <header className="space-y-1">
