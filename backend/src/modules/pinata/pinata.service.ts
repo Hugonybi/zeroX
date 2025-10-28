@@ -17,7 +17,7 @@ export class PinataService {
     }
   }
 
-  async uploadJSON(metadata: any): Promise<string> {
+  async uploadJSON(metadata: Record<string, unknown>): Promise<string> {
     try {
       const response = await axios.post(
         `${this.pinataApiUrl}/pinning/pinJSONToIPFS`,

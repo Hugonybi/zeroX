@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 import { Roles } from '@common/decorators/roles.decorator';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { TestCompleteOrderDto } from './dto/test-complete-order.dto';
 
 @Controller()
 export class OrdersController {
@@ -15,5 +16,12 @@ export class OrdersController {
   createCheckout(@Req() req: Request, @Body() dto: CreateOrderDto) {
     const user = req.user as { userId: string };
     return this.ordersService.createCheckout(user.userId, dto);
+  }
+
+  // TEST ENDPOINT - Complete order without payment (for testing only)
+  @UseGuards(JwtAuthGuard)
+  @Post('test/complete-order')
+  async testCompleteOrder(@Body() dto: TestCompleteOrderDto) {
+    return this.ordersService.testCompleteOrder(dto.orderId);
   }
 }

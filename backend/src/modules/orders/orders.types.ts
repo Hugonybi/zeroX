@@ -1,3 +1,4 @@
 export enum PaymentProvider {
-  paystack = 'paystack'
+  paystack = 'paystack',
+  test = 'test' // For testing without actual payment
 }

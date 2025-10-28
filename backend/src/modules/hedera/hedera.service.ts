@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Client, PrivateKey, TokenMintTransaction, TransactionResponse } from '@hashgraph/sdk';
+import { Client, PrivateKey, TokenMintTransaction, TransactionResponse, AccountBalanceQuery } from '@hashgraph/sdk';
 
 @Injectable()
 export class HederaService {
   private readonly logger = new Logger(HederaService.name);
   private readonly client: Client;
   private readonly treasuryKey: PrivateKey;
+  private readonly accountId: string;
 
   constructor(private readonly configService: ConfigService) {
     const accountId = this.configService.get<string>('hedera.accountId');
@@ -21,9 +22,24 @@ export class HederaService {
       throw new Error('Missing Hedera treasury key');
     }
 
+    this.accountId = accountId;
     this.client = Client.forTestnet();
+    // Use fromString() to auto-detect key type (ED25519 or ECDSA)
     this.client.setOperator(accountId, PrivateKey.fromString(privateKey));
     this.treasuryKey = PrivateKey.fromString(treasuryKey);
+  }
+
+  async getAccountBalance(): Promise<string> {
+    try {
+      const query = new AccountBalanceQuery()
+        .setAccountId(this.accountId);
+      
+      const balance = await query.execute(this.client);
+      return balance.hbars.toString();
+    } catch (error) {
+      this.logger.error(`Failed to get account balance for ${this.accountId}`, error);
+      throw error;
+    }
   }
 
   async mintUniqueToken(tokenId: string, metadata: Buffer): Promise<{ transactionId: string; serialNumbers: number[] }> {
@@ -76,8 +92,12 @@ export class HederaService {
     // Freeze the transaction with client
     const frozenTransaction = await transaction.freezeWith(this.client);
 
-    // Sign with supply key (treasury key)
-    const signedTransaction = await frozenTransaction.sign(this.treasuryKey);
+    // Sign with operator key (which is the supply key for our tokens)
+    const operatorKeyStr = this.configService.get<string>('hedera.privateKey');
+    if (!operatorKeyStr) {
+      throw new Error('Missing Hedera operator private key');
+    }
+    const signedTransaction = await frozenTransaction.sign(PrivateKey.fromString(operatorKeyStr));
 
     // Execute the transaction
     return signedTransaction.execute(this.client);

@@ -11,6 +11,7 @@ import { PaymentsModule } from '@modules/payments/payments.module';
 import { QueueModule } from './queue/queue.module';
 import { IpfsModule } from '@modules/ipfs/ipfs.module';
 import { HederaModule } from '@modules/hedera/hedera.module';
+import { TokenizationModule } from '@modules/tokenization/tokenization.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { HederaModule } from '@modules/hedera/hedera.module';
     PaymentsModule,
     QueueModule,
     IpfsModule,
-    HederaModule
+    HederaModule,
+    TokenizationModule
   ]
 })
 export class AppModule {}

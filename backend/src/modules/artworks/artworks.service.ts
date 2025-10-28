@@ -1,15 +1,52 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ArtworkStatus, Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { ArtworkStatus, Prisma, Artwork } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
 
 @Injectable()
 export class ArtworksService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly apiBaseUrl: string;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
+    this.apiBaseUrl = this.configService.get<string>('apiBaseUrl', 'http://localhost:4000');
+  }
+
+  /**
+   * Transforms Azure Blob Storage URLs to use the backend proxy to avoid CORS issues.
+   * Example: https://zerox.blob.core.windows.net/artwork/image.jpg
+   * becomes: http://localhost:4000/proxy/image/zerox.blob.core.windows.net/artwork/image.jpg
+   */
+  private transformAzureUrl(url: string | null): string | null {
+    if (!url || !url.startsWith('https://') || !url.includes('.blob.core.windows.net')) {
+      return url;
+    }
+
+    // Extract the part after https://
+    const pathAfterProtocol = url.replace('https://', '');
+    return `${this.apiBaseUrl}/proxy/image/${pathAfterProtocol}`;
+  }
+
+  /**
+   * Transforms an artwork object to use proxied URLs for media.
+   */
+  private transformArtwork(artwork: Artwork): Artwork {
+    const transformed = { ...artwork };
+    if (artwork.mediaUrl) {
+      transformed.mediaUrl = this.transformAzureUrl(artwork.mediaUrl) || artwork.mediaUrl;
+    }
+    if (artwork.metadataUrl) {
+      transformed.metadataUrl = this.transformAzureUrl(artwork.metadataUrl) || artwork.metadataUrl;
+    }
+    return transformed;
+  }
 
   async create(artistId: string, dto: CreateArtworkDto) {
-    return this.prisma.artwork.create({
+    const artwork = await this.prisma.artwork.create({
       data: {
         artistId,
         title: dto.title,
@@ -24,6 +61,7 @@ export class ArtworksService {
         status: dto.status ?? ArtworkStatus.draft
       }
     });
+    return this.transformArtwork(artwork);
   }
 
   async findById(id: string) {
@@ -31,7 +69,7 @@ export class ArtworksService {
     if (!artwork) {
       throw new NotFoundException('Artwork not found');
     }
-    return artwork;
+    return this.transformArtwork(artwork);
   }
 
   async update(id: string, dto: UpdateArtworkDto) {
@@ -47,10 +85,11 @@ export class ArtworksService {
     if (dto.priceCents !== undefined) data.priceCents = dto.priceCents;
     if (dto.currency !== undefined) data.currency = dto.currency;
     if (dto.status !== undefined) data.status = dto.status;
-    return this.prisma.artwork.update({ where: { id }, data });
+    const artwork = await this.prisma.artwork.update({ where: { id }, data });
+    return this.transformArtwork(artwork);
   }
 
-  findPublished(filters: {
+  async findPublished(filters: {
     type?: string;
     artist?: string;
     minPrice?: number;
@@ -70,6 +109,15 @@ export class ArtworksService {
     } else if (filters.maxPrice) {
       where.priceCents = { lte: filters.maxPrice };
     }
-    return this.prisma.artwork.findMany({ where, orderBy: { createdAt: 'desc' } });
+    const artworks = await this.prisma.artwork.findMany({ where, orderBy: { createdAt: 'desc' } });
+    return artworks.map(artwork => this.transformArtwork(artwork));
+  }
+
+  async findPublishedById(id: string) {
+    const artwork = await this.prisma.artwork.findUnique({ where: { id, status: ArtworkStatus.published } });
+    if (!artwork) {
+      throw new NotFoundException('Artwork not found');
+    }
+    return this.transformArtwork(artwork);
   }
 }

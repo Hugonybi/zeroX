@@ -4,6 +4,7 @@ import { AdminPage } from "./pages/AdminPage";
 import { ArtistsPage } from "./pages/ArtistsPage";
 import { ArtworkDetailPage } from "./pages/ArtworkDetailPage";
 import { GalleryPage } from "./pages/GalleryPage";
+import { CertificatePage } from "./pages/CertificatePage";
 
 function NotFound() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="artworks/:artworkId" element={<ArtworkDetailPage />} />
           <Route path="artists" element={<ArtistsPage />} />
           <Route path="admin" element={<AdminPage />} />
+          <Route path="certificate/:orderId" element={<CertificatePage />} />
           <Route
             path="*"
             element={<NotFound />}
