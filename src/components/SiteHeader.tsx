@@ -1,11 +1,29 @@
 import { Link, NavLink } from "react-router-dom";
+import { useAuth } from "../features/auth/hooks";
 
-const primaryLinks = [
+const publicLinks = [
   { to: "/", label: "Store" },
-  { to: "/artists", label: "Profile" },
+];
+
+const authenticatedLinks = [
+  { to: "/", label: "Store" },
+  { to: "/profile", label: "Profile" },
+  { to: "/artists", label: "Dashboard", roles: ['artist'] as string[] },
 ];
 
 export function SiteHeader() {
+  const { user, isAuthenticated, signOut } = useAuth();
+
+  const getVisibleLinks = () => {
+    if (!isAuthenticated || !user) return publicLinks;
+
+    return authenticatedLinks.filter(link => 
+      !link.roles || link.roles.includes(user.role)
+    );
+  };
+
+  const links = getVisibleLinks();
+
   return (
     <header className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-8">
@@ -34,7 +52,7 @@ export function SiteHeader() {
         </button>
       </div>
         <nav className="flex flex-wrap items-center gap-8 text-xs font-semibold uppercase tracking-[0.35em] text-ink-muted">
-          {primaryLinks.map(({ to, label }) => (
+          {links.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -48,17 +66,38 @@ export function SiteHeader() {
 
           <span className="hidden h-3 w-px bg-charcoal/20 sm:inline" aria-hidden="true" />
 
-
-            
-          <button type="button" className="text-xs font-semibold lowercase tracking-[0.25em] text-violet-500">
-            sign up
-          </button>
-          <button type="button" className="text-xs font-semibold lowercase tracking-[0.25em] text-emerald-500">
-            login
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-ink">
+                Welcome, {user?.name}
+              </span>
+              <button
+                type="button"
+                onClick={signOut}
+                className="text-xs font-semibold lowercase tracking-[0.25em] text-red-500 hover:text-red-700"
+              >
+                logout
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                to="/register"
+                className="text-xs font-semibold lowercase tracking-[0.25em] text-violet-500 hover:text-violet-700"
+              >
+                sign up
+              </Link>
+              <Link
+                to="/login"
+                className="text-xs font-semibold lowercase tracking-[0.25em] text-emerald-500 hover:text-emerald-700"
+              >
+                login
+              </Link>
+            </>
+          )}
         </nav>
       </div>
-    
+
     </header>
   );
 }

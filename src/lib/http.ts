@@ -50,7 +50,7 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 		return undefined;
 	};
 
-		const buildHeaders = async (initial?: HeadersInit) => {
+	const buildHeaders = async (initial?: HeadersInit) => {
 		const headers = new Headers(options.baseHeaders ?? {});
 		if (initial) {
 			new Headers(initial).forEach((value, key) => {
@@ -58,38 +58,36 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 			});
 		}
 
-		const token = await options.getAuthToken?.();
-		if (token && !headers.has("authorization")) {
-			headers.set("authorization", `Bearer ${token}`);
-		}
+		// For cookie-based auth, we don't need to set Authorization header
+		// The browser will automatically send cookies with credentials: 'include'
 
 		return headers;
 	};
 
-			const prepareBody = (body: unknown, headers: Headers): BodyInit => {
-				if (
-					body instanceof FormData ||
-					body instanceof Blob ||
-					body instanceof ArrayBuffer ||
-					body instanceof URLSearchParams ||
-					(typeof ReadableStream !== "undefined" && body instanceof ReadableStream)
-				) {
-				return body;
-			}
+	const prepareBody = (body: unknown, headers: Headers): BodyInit => {
+		if (
+			body instanceof FormData ||
+			body instanceof Blob ||
+			body instanceof ArrayBuffer ||
+			body instanceof URLSearchParams ||
+			(typeof ReadableStream !== "undefined" && body instanceof ReadableStream)
+		) {
+			return body;
+		}
 
-			if (typeof body === "string") {
-				if (!headers.has("content-type")) {
-					headers.set("content-type", "text/plain;charset=UTF-8");
-				}
-				return body;
+		if (typeof body === "string") {
+			if (!headers.has("content-type")) {
+				headers.set("content-type", "text/plain;charset=UTF-8");
 			}
+			return body;
+		}
 
-				if (!headers.has("content-type")) {
-				headers.set("content-type", "application/json");
-			}
+		if (!headers.has("content-type")) {
+			headers.set("content-type", "application/json");
+		}
 
-				return JSON.stringify(body);
-		};
+		return JSON.stringify(body);
+	};
 
 		const send = async <TResponse>(method: string, path: string, body?: unknown, init: RequestInit = {}) => {
 			const headers = await buildHeaders(init.headers);
@@ -107,35 +105,50 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 				method,
 				headers,
 				body: finalBody,
+				credentials: 'include', // Include cookies in requests
 			};
 
-		const url = `${trimmedBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+			const url = `${trimmedBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
-		options.onRequest?.(url, requestInit);
+			options.onRequest?.(url, requestInit);
 
-		const response = await fetch(url, requestInit);
+			let response = await fetch(url, requestInit);
 
-		options.onResponse?.(response);
+			// Handle 401 - try to refresh token once
+			if (response.status === 401) {
+				try {
+					// Attempt to refresh the session
+					await fetch(`${trimmedBaseUrl}/auth/refresh`, {
+						method: 'POST',
+						credentials: 'include',
+					});
+					// Retry the original request
+					response = await fetch(url, requestInit);
+				} catch (refreshError) {
+					// Refresh failed, continue with original 401 response
+					console.warn('Token refresh failed:', refreshError);
+				}
+			}
 
-		if (!response.ok) {
-			const errorBody = await resolveJson(response);
-			throw new HttpError("Request failed", response.status, response.statusText, errorBody);
-		}
+			options.onResponse?.(response);
 
-		if (response.status === 204) {
-			return undefined as TResponse;
-		}
+			if (!response.ok) {
+				const errorBody = await resolveJson(response);
+				throw new HttpError("Request failed", response.status, response.statusText, errorBody);
+			}
 
-		const data = await resolveJson(response);
-		return data as TResponse;
-	};
+			if (response.status === 204) {
+				return undefined as TResponse;
+			}
 
-		return {
-			request: <TResponse>(path: string, init?: RequestInit) => send<TResponse>(init?.method ?? "GET", path, undefined, init),
+			const data = await resolveJson(response);
+			return data as TResponse;
+		};	return {
+		request: <TResponse>(path: string, init?: RequestInit) => send<TResponse>(init?.method ?? "GET", path, undefined, init),
 		get: <TResponse>(path: string, init?: RequestInit) => send<TResponse>("GET", path, undefined, init),
 		post: <TResponse>(path: string, body?: unknown, init?: RequestInit) => send<TResponse>("POST", path, body, init),
 		put: <TResponse>(path: string, body?: unknown, init?: RequestInit) => send<TResponse>("PUT", path, body, init),
 		patch: <TResponse>(path: string, body?: unknown, init?: RequestInit) => send<TResponse>("PATCH", path, body, init),
-			delete: <TResponse>(path: string, init?: RequestInit) => send<TResponse>("DELETE", path, undefined, init),
+		delete: <TResponse>(path: string, init?: RequestInit) => send<TResponse>("DELETE", path, undefined, init),
 	};
 }

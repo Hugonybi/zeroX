@@ -5,6 +5,10 @@ import { ArtistsPage } from "./pages/ArtistsPage";
 import { ArtworkDetailPage } from "./pages/ArtworkDetailPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CertificatePage } from "./pages/CertificatePage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function NotFound() {
   return (
@@ -20,12 +24,43 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route element={<RootLayout />}>
           <Route index element={<GalleryPage />} />
           <Route path="artworks/:artworkId" element={<ArtworkDetailPage />} />
-          <Route path="artists" element={<ArtistsPage />} />
-          <Route path="admin" element={<AdminPage />} />
-          <Route path="certificate/:orderId" element={<CertificatePage />} />
+          <Route
+            path="artists"
+            element={
+              <ProtectedRoute requiredRoles={['artist']}>
+                <ArtistsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin"
+            element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="certificate/:orderId"
+            element={
+              <ProtectedRoute>
+                <CertificatePage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="*"
             element={<NotFound />}
