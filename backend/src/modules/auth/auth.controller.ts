@@ -1,5 +1,6 @@
 import { Body, Controller, Post, Get, Res, UseGuards, Request } from '@nestjs/common';
 import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -14,6 +15,8 @@ export class AuthController {
     private readonly usersService: UsersService
   ) {}
 
+  // Stricter rate limit: 5 registration attempts per hour per IP
+  @Throttle({ default: { limit: 5, ttl: 3600000 } })
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.register(dto);
@@ -21,6 +24,8 @@ export class AuthController {
     return { message: 'Registration successful' };
   }
 
+  // Stricter rate limit: 5 login attempts per 15 minutes per IP
+  @Throttle({ default: { limit: 5, ttl: 900000 } })
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(dto.email, dto.password);

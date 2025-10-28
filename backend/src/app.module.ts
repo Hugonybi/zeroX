@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { PrismaModule } from '@common/prisma/prisma.module';
@@ -20,6 +22,13 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
       load: [configuration],
       validationSchema
     }),
+    // Rate limiting: 10 requests per minute per IP (global default)
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 seconds
+        limit: 10, // 10 requests
+      },
+    ]),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -30,6 +39,13 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
     IpfsModule,
     HederaModule,
     TokenizationModule
-  ]
+  ],
+  providers: [
+    // Apply rate limiting globally
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

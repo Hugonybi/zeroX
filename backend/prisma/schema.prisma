@@ -56,11 +56,14 @@ model User {
   name            String
   bio             String?
   kycStatus       KycStatus        @default(none)
+  failedLoginAttempts Int          @default(0)
+  lockedUntil     DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   artworks        Artwork[]
   orders          Order[]          @relation("BuyerOrders")
   ownershipTokens OwnershipToken[]
+  refreshTokens   RefreshToken[]
 }
 
 model Artwork {
@@ -142,4 +145,19 @@ model AuditLog {
   action     String
   metaJson   Json
   createdAt  DateTime @default(now())
+}
+
+model RefreshToken {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  token        String   @unique
+  isRevoked    Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  revokedAt    DateTime?
+  replacedBy   String?  // Token ID that replaced this one (for rotation tracking)
+
+  @@index([userId])
+  @@index([token])
 }

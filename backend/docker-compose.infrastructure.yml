@@ -6,7 +6,8 @@ services:
     environment:
       POSTGRES_DB: hedera_marketplace
       POSTGRES_USER: hedera
-      POSTGRES_PASSWORD: hedera
+      # SECURITY: Strong password - must match DATABASE_URL in .env
+      POSTGRES_PASSWORD: b9wyTSdOLvfms37VxcMICqcQeXLGqE
     ports:
       - '5432:5432'
     volumes:
