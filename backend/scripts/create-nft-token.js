@@ -56,8 +56,8 @@ async function createNftToken() {
   try {
     // Create the NFT token
     const tokenCreateTx = new TokenCreateTransaction()
-      .setTokenName('Hedera Art Marketplace Certificates')
-      .setTokenSymbol('HAMC')
+      .setTokenName('zeroX Certificates')
+      .setTokenSymbol('0Xc')
       .setTokenType(TokenType.NonFungibleUnique)
       .setDecimals(0)
       .setInitialSupply(0)

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { QueueService } from './queue.service';
+import { MintQueueName } from './queue.constants';
 import { MintAuthenticityWorker } from '../workers/mint-authenticity.worker';
 import { HederaModule } from '../modules/hedera/hedera.module';
 import { PinataModule } from '../modules/pinata/pinata.module';
@@ -22,7 +23,7 @@ import { PrismaModule } from '../modules/prisma/prisma.module';
       inject: [ConfigService]
     }),
     BullModule.registerQueue({
-      name: 'mint'
+      name: MintQueueName
     }),
     PrismaModule,
     HederaModule,

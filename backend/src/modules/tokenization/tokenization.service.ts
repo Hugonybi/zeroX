@@ -56,16 +56,6 @@ export class TokenizationService {
       const metadataIpfs = await this.pinataService.uploadJSON(metadata as unknown as Record<string, unknown>);
       this.logger.log(`Ownership metadata pinned to IPFS: ${metadataIpfs}`);
 
-      // Create metadata buffer following HIP-412 standard
-      const nftMetadata = JSON.stringify({
-        name: metadata.name,
-        description: metadata.description,
-        image: metadata.image,
-        type: metadata.type,
-        external_url: metadataIpfs,
-        properties: metadata.properties
-      });
-
       // Get ownership token ID from config
       const ownershipTokenId = this.configService.get<string>('hedera.ownershipTokenId');
       if (!ownershipTokenId) {
@@ -73,9 +63,10 @@ export class TokenizationService {
       }
 
       // Mint the ownership NFT (will be frozen by default)
+      // Store only IPFS CID in metadata (under 100 bytes limit)
       const mintResult = await this.hederaService.mintUniqueToken(
         ownershipTokenId,
-        Buffer.from(nftMetadata, 'utf8')
+        Buffer.from(metadataIpfs, 'utf8')
       );
 
       const serialNumber = mintResult.serialNumbers[0];
