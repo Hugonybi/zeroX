@@ -22,11 +22,11 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
       load: [configuration],
       validationSchema
     }),
-    // Rate limiting: 10 requests per minute per IP (global default)
+    // Rate limiting: 100 requests per minute per IP (global default)
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 seconds
-        limit: 10, // 10 requests
+        limit: 100, // 100 requests
       },
     ]),
     PrismaModule,
