@@ -6,7 +6,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 export function DevAuthBanner() {
   const { user, isAuthenticated, signOut } = useAuth();
 
-  const handleAutoGenerate = async () => {
+  const handleAutoGenerateArtist = async () => {
     try {
       // Register a test artist account
       const response = await fetch(`${BASE_URL}/auth/register`, {
@@ -17,6 +17,31 @@ export function DevAuthBanner() {
           password: 'Test123!@#',
           name: 'Dev Test Artist',
           role: 'artist',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate token');
+      }
+
+      // Refresh the page to trigger auth initialization
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to generate token:', err);
+    }
+  };
+
+  const handleAutoGenerateBuyer = async () => {
+    try {
+      // Register a test buyer account
+      const response = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `buyer-${Date.now()}@test.com`,
+          password: 'Test123!@#',
+          name: 'Dev Test Buyer',
+          role: 'buyer',
         }),
       });
 
@@ -53,15 +78,24 @@ export function DevAuthBanner() {
           ) : (
             <>
               <p className="text-amber-700">Not authenticated</p>
-              <Button 
-                variant="primary" 
-                size="sm" 
-                onClick={handleAutoGenerate}
-              >
-                Auto-Generate Artist Account
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  onClick={handleAutoGenerateArtist}
+                >
+                  Generate Artist
+                </Button>
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  onClick={handleAutoGenerateBuyer}
+                >
+                  Generate Buyer
+                </Button>
+              </div>
               <p className="text-xs text-amber-600">
-                💡 Creates a test artist account and logs you in automatically
+                💡 Creates a test account and logs you in automatically
               </p>
             </>
           )}
