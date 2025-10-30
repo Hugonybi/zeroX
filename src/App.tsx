@@ -9,6 +9,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { UnauthorizedPage } from "./pages/UnauthorizedPage";
+import { OrderStatusPage } from "./pages/OrderStatusPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function NotFound() {
@@ -52,6 +53,14 @@ function App() {
             element={
               <ProtectedRoute requiredRoles={['admin']}>
                 <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="orders/:orderId"
+            element={
+              <ProtectedRoute>
+                <OrderStatusPage />
               </ProtectedRoute>
             }
           />
