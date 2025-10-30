@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document outlines the requirements for enhancing the Role-Based Access Control (RBAC) system in the zeroX art marketplace platform, with primary focus on buyer and artist roles. The current system has basic role differentiation but lacks comprehensive permission management and resource-level access control. This enhancement will provide granular control over user permissions for core marketplace operations while maintaining a foundation for future admin role expansion.
+This document outlines the requirements for enhancing the Role-Based Access Control (RBAC) system in the zeroX art marketplace platform, covering buyer, artist, and admin roles. The current system has basic role differentiation but lacks comprehensive permission management and resource-level access control. This enhancement will provide granular control over user permissions for core marketplace operations, with special focus on admin capabilities for platform oversight and management.
 
 ## Requirements
 
@@ -101,3 +101,63 @@ This document outlines the requirements for enhancing the Role-Based Access Cont
 3. WHEN rendering order history THEN the system SHALL only include orders the user is authorized to see
 4. IF a user owns an artwork THEN the system SHALL display ownership-specific features like certificates and transfer options
 5. WHEN checking resource permissions THEN the system SHALL efficiently determine access rights for UI rendering decisions
+
+### Requirement 9
+
+**User Story:** As an admin, I want comprehensive platform oversight capabilities, so that I can manage users, monitor system health, and handle exceptional situations effectively.
+
+#### Acceptance Criteria
+
+1. WHEN an admin accesses the platform THEN the system SHALL provide a dedicated admin dashboard with platform-wide statistics and controls
+2. WHEN viewing user management THEN the system SHALL display all users with their roles, status, and activity metrics
+3. WHEN managing user accounts THEN the system SHALL allow admins to update user roles, suspend accounts, and reset passwords
+4. IF there are failed minting operations THEN the system SHALL provide admin tools to retry, investigate, or manually resolve issues
+5. WHEN monitoring system health THEN the system SHALL display queue status, error logs, and performance metrics
+
+### Requirement 10
+
+**User Story:** As an admin, I want to manage all artworks and orders across the platform, so that I can handle disputes, moderate content, and ensure platform quality.
+
+#### Acceptance Criteria
+
+1. WHEN viewing artwork management THEN the system SHALL display all artworks regardless of artist with moderation controls
+2. WHEN moderating content THEN the system SHALL allow admins to hide, flag, or remove inappropriate artworks
+3. WHEN handling disputes THEN the system SHALL provide access to all order details, payment information, and communication logs
+4. IF an order has issues THEN the system SHALL allow admins to modify order status, process refunds, or initiate manual token minting
+5. WHEN reviewing platform activity THEN the system SHALL provide audit logs of all significant user and system actions
+
+### Requirement 11
+
+**User Story:** As an admin, I want advanced user management capabilities, so that I can maintain platform security and handle user-related issues efficiently.
+
+#### Acceptance Criteria
+
+1. WHEN managing user roles THEN the system SHALL allow admins to promote buyers to artists or change user roles with proper validation
+2. WHEN handling security issues THEN the system SHALL provide tools to suspend users, revoke tokens, and investigate suspicious activity
+3. WHEN processing KYC requests THEN the system SHALL allow admins to review and approve or reject user verification submissions
+4. IF users report issues THEN the system SHALL provide admin tools to investigate user accounts, transaction history, and support tickets
+5. WHEN monitoring user activity THEN the system SHALL display user engagement metrics, transaction patterns, and potential fraud indicators
+
+### Requirement 12
+
+**User Story:** As an admin, I want blockchain and payment system oversight, so that I can monitor and resolve technical issues that affect user experience.
+
+#### Acceptance Criteria
+
+1. WHEN monitoring blockchain operations THEN the system SHALL display Hedera transaction status, token minting queues, and failure rates
+2. WHEN handling payment issues THEN the system SHALL provide access to Paystack transaction logs, refund capabilities, and payment reconciliation
+3. WHEN investigating failed operations THEN the system SHALL show detailed error logs, retry attempts, and manual intervention options
+4. IF blockchain transactions fail THEN the system SHALL allow admins to retry minting, update token metadata, or mark operations as resolved
+5. WHEN managing system configuration THEN the system SHALL provide admin controls for payment settings, blockchain parameters, and feature flags
+
+### Requirement 13
+
+**User Story:** As an admin, I want secure access controls and audit capabilities, so that admin actions are properly tracked and platform security is maintained.
+
+#### Acceptance Criteria
+
+1. WHEN admin users access sensitive functions THEN the system SHALL require additional authentication or confirmation for destructive actions
+2. WHEN performing admin operations THEN the system SHALL log all actions with timestamps, user identification, and affected resources
+3. WHEN viewing audit logs THEN the system SHALL provide filtering, searching, and export capabilities for compliance and investigation
+4. IF multiple admins exist THEN the system SHALL support role hierarchy with different admin permission levels
+5. WHEN admin sessions are active THEN the system SHALL enforce shorter session timeouts and require periodic re-authentication for sensitive operations
