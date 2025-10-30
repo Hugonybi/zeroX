@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { TextField } from '../components/ui/TextField';
 import { TextArea } from '../components/ui/TextArea';
+import { Badge } from '../components/ui/Badge';
 import { useAuth } from '../features/auth/hooks';
 
 export function ProfilePage() {
@@ -116,7 +117,16 @@ export function ProfilePage() {
             <label htmlFor="role" className="block text-sm font-medium text-gray-700">
               Account Type
             </label>
-            <p className="mt-1 text-gray-900 capitalize">{user.role}</p>
+            <div className="mt-2">
+              <Badge tone={user.role === 'admin' ? 'success' : user.role === 'artist' ? 'info' : 'neutral'}>
+                <span className="capitalize">{user.role}</span>
+              </Badge>
+            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              {user.role === 'admin' && 'Full access to admin console and moderation tools'}
+              {user.role === 'artist' && 'Can create and manage artwork listings'}
+              {user.role === 'buyer' && 'Can purchase artworks and view certificates'}
+            </p>
           </div>
 
           <div>

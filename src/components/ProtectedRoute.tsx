@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useProtectedRoute } from '../features/auth/hooks';
+import { useAuth } from '../features/auth/hooks';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,6 +9,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
   const { isAllowed, isLoading } = useProtectedRoute(requiredRoles);
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -19,7 +21,11 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
   }
 
   if (!isAllowed) {
-    // Redirect to login with return url
+    // If user is authenticated but doesn't have required role, show unauthorized page
+    if (isAuthenticated && requiredRoles) {
+      return <Navigate to="/unauthorized" replace />;
+    }
+    // Otherwise, redirect to login with return url
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
