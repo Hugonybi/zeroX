@@ -14,6 +14,7 @@ import { QueueModule } from './queue/queue.module';
 import { IpfsModule } from '@modules/ipfs/ipfs.module';
 import { HederaModule } from '@modules/hedera/hedera.module';
 import { TokenizationModule } from '@modules/tokenization/tokenization.module';
+import { AdminModule } from '@modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
     QueueModule,
     IpfsModule,
     HederaModule,
-    TokenizationModule
+    TokenizationModule,
+    AdminModule
   ],
   providers: [
     // Apply rate limiting globally

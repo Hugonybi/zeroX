@@ -36,3 +36,49 @@ a:hover {
   font-family: "Pixelify Sans", cursive;
   letter-spacing: -0.02em;
 }
+
+/* Admin notification animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in;
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.3s ease-out;
+}

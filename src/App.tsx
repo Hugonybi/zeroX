@@ -1,6 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RootLayout } from "./layouts/RootLayout";
+import { AdminLayout } from "./layouts/AdminLayout";
 import { AdminPage } from "./pages/AdminPage";
+import { AdminUserManagementPage } from "./pages/AdminUserManagementPage";
+import { AdminMonitoringPage } from "./pages/AdminMonitoringPage";
 import { ArtistsPage } from "./pages/ArtistsPage";
 import { ArtworkDetailPage } from "./pages/ArtworkDetailPage";
 import { GalleryPage } from "./pages/GalleryPage";
@@ -52,13 +55,20 @@ function App() {
             }
           />
           <Route
-            path="admin"
+            path="admin/*"
             element={
               <ProtectedRoute requiredRoles={['admin']}>
-                <AdminPage />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<AdminPage />} />
+            {/* Admin sub-pages */}
+            <Route path="users" element={<AdminUserManagementPage />} />
+            <Route path="artworks" element={<div>Artwork Oversight - Coming Soon</div>} />
+            <Route path="monitoring" element={<AdminMonitoringPage />} />
+            <Route path="system" element={<div>System Health - Coming Soon</div>} />
+          </Route>
           <Route
             path="orders/:orderId"
             element={
