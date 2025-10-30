@@ -16,7 +16,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "setup:token": "node scripts/create-nft-token.js",
-    "setup:ownership-token": "node scripts/create-ownership-token.js"
+    "setup:ownership-token": "node scripts/create-ownership-token.js",
+    "create:admin": "node scripts/create-admin-user.js"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.41.2",

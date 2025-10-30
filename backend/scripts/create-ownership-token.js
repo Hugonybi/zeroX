@@ -68,8 +68,8 @@ async function createOwnershipToken() {
   try {
     // Create the ownership NFT token with advanced key controls
     const tokenCreateTx = new TokenCreateTransaction()
-      .setTokenName('Hedera Art Ownership Certificates')
-      .setTokenSymbol('HAOC')
+      .setTokenName('zeroX Ownership Certificates')
+      .setTokenSymbol('zeroX')
       .setTokenType(TokenType.NonFungibleUnique)
       .setDecimals(0)
       .setInitialSupply(0)
