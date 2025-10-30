@@ -24,10 +24,14 @@ export function useCheckout(): UseCheckoutReturn {
     setState({ isLoading: true, error: null, data: null });
     
     try {
+      console.log('[useCheckout] Creating checkout with:', request);
+      console.log('[useCheckout] Cookies:', document.cookie);
       const response = await orderService.createCheckout(request);
+      console.log('[useCheckout] Checkout successful:', response);
       setState({ isLoading: false, error: null, data: response });
       return response;
     } catch (err) {
+      console.error('[useCheckout] Checkout failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to create checkout';
       setState({ isLoading: false, error: errorMessage, data: null });
       return null;

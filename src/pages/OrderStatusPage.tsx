@@ -1,11 +1,14 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useOrderPolling } from '../hooks/useOrderPolling';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { orderService } from '../lib/orderService';
 
 export function OrderStatusPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const [isCompletingPayment, setIsCompletingPayment] = useState(false);
 
   const { order, isLoading, error } = useOrderPolling({
     orderId: orderId || '',
@@ -21,6 +24,23 @@ export function OrderStatusPage() {
       }
     },
   });
+
+  // Handler for demo/test payment completion
+  const handleCompleteTestPayment = async () => {
+    if (!orderId) return;
+    
+    setIsCompletingPayment(true);
+    try {
+      await orderService.testCompleteOrder(orderId);
+      console.log('✅ Test payment completed, order will update shortly');
+      // The polling hook will automatically detect the status change
+    } catch (err) {
+      console.error('❌ Failed to complete test payment:', err);
+      alert('Failed to complete test payment. Check console for details.');
+    } finally {
+      setIsCompletingPayment(false);
+    }
+  };
 
   if (!orderId) {
     return (
@@ -150,11 +170,33 @@ export function OrderStatusPage() {
           )}
 
           {order.paymentStatus === 'pending' && order.orderStatus === 'created' && (
-            <div className="rounded-lg bg-yellow-50 p-4">
-              <p className="text-sm font-semibold text-yellow-800">Payment pending</p>
-              <p className="mt-1 text-xs text-yellow-700">
-                Waiting for payment confirmation. This page will update automatically.
-              </p>
+            <div className="space-y-3">
+              <div className="rounded-lg bg-yellow-50 p-4">
+                <p className="text-sm font-semibold text-yellow-800">Payment pending</p>
+                <p className="mt-1 text-xs text-yellow-700">
+                  Waiting for payment confirmation. This page will update automatically.
+                </p>
+              </div>
+              
+              {/* Demo Mode: Allow completing test payments */}
+              {order.paymentProvider === 'test' && (
+                <div className="rounded-lg border-2 border-dashed border-mint/30 bg-mint-soft p-4">
+                  <p className="text-sm font-semibold text-ink mb-2">🧪 Demo Mode</p>
+                  <p className="text-xs text-ink-muted mb-3">
+                    This is a test order. Click below to simulate payment completion and trigger minting.
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleCompleteTestPayment}
+                    loading={isCompletingPayment}
+                    disabled={isCompletingPayment}
+                    className="w-full"
+                  >
+                    {isCompletingPayment ? 'Processing...' : 'Complete Test Payment'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

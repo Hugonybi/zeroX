@@ -135,12 +135,11 @@ export function createHttpClient(baseUrl: string, options: HttpClientOptions = {
 			}
 		}			options.onResponse?.(response);
 
-			if (!response.ok) {
-				const errorBody = await resolveJson(response);
-				throw new HttpError("Request failed", response.status, response.statusText, errorBody);
-			}
-
-			if (response.status === 204) {
+		if (!response.ok) {
+			const errorBody = await resolveJson(response);
+			const errorMessage = errorBody?.message || `Request failed with status ${response.status}`;
+			throw new HttpError(errorMessage, response.status, response.statusText, errorBody);
+		}			if (response.status === 204) {
 				return undefined as TResponse;
 			}
 

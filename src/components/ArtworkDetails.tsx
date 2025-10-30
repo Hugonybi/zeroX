@@ -37,24 +37,21 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
       return;
     }
 
-    // Create checkout session
+    // Create checkout session with test provider (demo mode)
     const result = await checkout({
       artworkId,
-      paymentProvider: 'paystack',
+      paymentProvider: 'test', // Using test provider for demo
     });
 
     if (result) {
-      // Store order ID and navigate to order status page
+      // Store order ID
       sessionStorage.setItem('currentOrderId', result.order.id);
       
-      // If payment URL is provided, open Paystack popup
-      if (result.payment?.authorization_url) {
-        // Will implement Paystack popup in Phase 3
-        window.location.href = result.payment.authorization_url;
-      } else {
-        // Navigate to order status page
-        navigate(`/orders/${result.order.id}`);
-      }
+      // For test provider, directly complete the order
+      console.log('✅ Checkout created with test provider:', result.order.id);
+      
+      // Navigate to order status page
+      navigate(`/orders/${result.order.id}`);
     }
   };
 
