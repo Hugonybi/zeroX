@@ -2,22 +2,28 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from './ui/Badge';
 import type { Order } from '../types/order';
 
-interface OrderCardProps {
-  order: Order & {
-    artwork?: {
-      title: string;
-      mediaUrl: string;
-      artistName?: string;
-    };
-  };
+interface OrderArtwork {
+  title: string;
+  mediaUrl: string;
+  artistName?: string;
 }
+
+interface OrderWithArtwork extends Order {
+  artwork?: OrderArtwork;
+}
+
+interface OrderCardProps {
+  order: OrderWithArtwork;
+}
+
+const UNKNOWN_ARTWORK_TITLE = 'Unknown Artwork';
 
 export function OrderCard({ order }: OrderCardProps) {
   const navigate = useNavigate();
 
   const formatPrice = (cents: number, currency: string): string => {
     try {
-      return new Intl.NumberFormat('en-NG', {
+      return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency,
         minimumFractionDigits: 0,
@@ -29,7 +35,7 @@ export function OrderCard({ order }: OrderCardProps) {
 
   const formatDate = (dateString: string): string => {
     try {
-      return new Date(dateString).toLocaleDateString('en-NG', {
+      return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -74,7 +80,7 @@ export function OrderCard({ order }: OrderCardProps) {
         <div>
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-ink line-clamp-1">
-              {order.artwork?.title || 'Artwork'}
+              {order.artwork?.title || UNKNOWN_ARTWORK_TITLE}
             </h3>
             <Badge tone={getStatusBadgeTone(order.orderStatus)}>
               {order.orderStatus}

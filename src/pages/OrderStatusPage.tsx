@@ -7,6 +7,21 @@ export function OrderStatusPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
 
+  const { order, isLoading, error } = useOrderPolling({
+    orderId: orderId || '',
+    enabled: !!orderId,
+    onStatusChange: (updatedOrder) => {
+      console.log('Order status changed:', updatedOrder.orderStatus);
+      
+      // Auto-redirect to certificate when fulfilled
+      if (updatedOrder.orderStatus === 'fulfilled' && orderId) {
+        setTimeout(() => {
+          navigate(`/certificate/${orderId}`);
+        }, 2000);
+      }
+    },
+  });
+
   if (!orderId) {
     return (
       <div className="space-y-4">
@@ -17,21 +32,6 @@ export function OrderStatusPage() {
       </div>
     );
   }
-
-  const { order, isLoading, error } = useOrderPolling({
-    orderId,
-    enabled: true,
-    onStatusChange: (updatedOrder) => {
-      console.log('Order status changed:', updatedOrder.orderStatus);
-      
-      // Auto-redirect to certificate when fulfilled
-      if (updatedOrder.orderStatus === 'fulfilled') {
-        setTimeout(() => {
-          navigate(`/certificate/${orderId}`);
-        }, 2000);
-      }
-    },
-  });
 
   if (isLoading && !order) {
     return (

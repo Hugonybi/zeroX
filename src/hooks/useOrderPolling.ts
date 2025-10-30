@@ -84,6 +84,7 @@ export function useOrderPolling({
     return () => {
       clearInterval(pollInterval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, enabled, interval]);
 
   return {
