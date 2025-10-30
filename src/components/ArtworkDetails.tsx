@@ -1,16 +1,63 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { PurchaseOptionCard } from "./ui/PurchaseOptionCard";
+import { useAuth } from "../features/auth/hooks";
+import { useCheckout } from "../hooks/useCheckout";
 
 interface ArtworkDetailsProps {
+  artworkId: string;
   editionLabel: string;
   title: string;
   artist: string;
   price: string;
   tokenId: string;
+  status: string;
 }
 
-export function ArtworkDetails({ editionLabel, title, artist, price, tokenId }: ArtworkDetailsProps) {
+export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, tokenId, status }: ArtworkDetailsProps) {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { checkout, isLoading, error } = useCheckout();
+  const [purchaseOption, setPurchaseOption] = useState<'both' | 'digital'>('both');
+
+  const handleBuyNow = async () => {
+    // Check authentication
+    if (!isAuthenticated) {
+      // Store intended artwork for post-login redirect
+      sessionStorage.setItem('intendedPurchase', JSON.stringify({ artworkId, purchaseOption }));
+      navigate('/login');
+      return;
+    }
+
+    // Verify user is a buyer
+    if (user?.role !== 'buyer') {
+      alert('Only buyers can purchase artworks. Please register as a buyer.');
+      return;
+    }
+
+    // Create checkout session
+    const result = await checkout({
+      artworkId,
+      paymentProvider: 'paystack',
+    });
+
+    if (result) {
+      // Store order ID and navigate to order status page
+      sessionStorage.setItem('currentOrderId', result.order.id);
+      
+      // If payment URL is provided, open Paystack popup
+      if (result.payment?.authorization_url) {
+        // Will implement Paystack popup in Phase 3
+        window.location.href = result.payment.authorization_url;
+      } else {
+        // Navigate to order status page
+        navigate(`/orders/${result.order.id}`);
+      }
+    }
+  };
+
   return (
     <section className="flex w-full max-w-md flex-col gap-6">
       <div className="space-y-1">
@@ -33,16 +80,32 @@ export function ArtworkDetails({ editionLabel, title, artist, price, tokenId }: 
           <PurchaseOptionCard
             title="Physical Art and Digital NFT"
             description={"Receive the original painting and digital twin"}
-            selected
+            selected={purchaseOption === 'both'}
+            onClick={() => setPurchaseOption('both')}
           />
           <PurchaseOptionCard
             title="Digital NFT Only"
             description={"Own the unique digital certificate of authenticity"}
+            selected={purchaseOption === 'digital'}
+            onClick={() => setPurchaseOption('digital')}
           />
         </div>
       </div>
 
-      <Button variant="primary">Buy Now</Button>
+      {error && (
+        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+
+      <Button 
+        variant="primary" 
+        onClick={handleBuyNow}
+        loading={isLoading}
+        disabled={status === 'sold' || isLoading}
+      >
+        {status === 'sold' ? 'Sold Out' : 'Buy Now'}
+      </Button>
     </section>
   );
 }

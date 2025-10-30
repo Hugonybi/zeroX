@@ -62,6 +62,39 @@ export class OrdersService {
     return this.prisma.order.findUnique({ where: { reference } });
   }
 
+  async getOrderById(orderId: string, userId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        artwork: true,
+        buyer: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Verify the user owns this order or is the artist/admin
+    if (order.buyerId !== userId && order.artwork.artistId !== userId) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
+
+  async getOrdersByBuyer(buyerId: string) {
+    return this.prisma.order.findMany({
+      where: { buyerId },
+      include: {
+        artwork: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   updatePaymentStatus(reference: string, paymentStatus: PaymentStatus, orderStatus: OrderStatus) {
     return this.prisma.order.update({
       where: { reference },
