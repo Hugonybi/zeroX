@@ -4,9 +4,12 @@ import { TextField } from '../components/ui/TextField';
 import { TextArea } from '../components/ui/TextArea';
 import { Badge } from '../components/ui/Badge';
 import { useAuth } from '../features/auth/hooks';
+import { OrderHistoryList } from '../components/OrderHistoryList';
+import { useOrderHistory } from '../hooks/useOrderHistory';
 
 export function ProfilePage() {
   const { user, refreshUser } = useAuth();
+  const { orders, isLoading: ordersLoading, error: ordersError } = useOrderHistory();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -59,7 +62,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
+    <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
       <div className="bg-white shadow rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
@@ -180,6 +183,21 @@ export function ProfilePage() {
           )}
         </form>
       </div>
+
+      {/* Order History Section - Only show for buyers */}
+      {user.role === 'buyer' && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="mb-6">
+            <h2 className="font-brand text-2xl uppercase tracking-[0.15em]">My Purchases</h2>
+            <p className="mt-2 text-sm text-ink-muted">View your order history and certificates</p>
+          </div>
+          <OrderHistoryList 
+            orders={orders} 
+            isLoading={ordersLoading} 
+            error={ordersError} 
+          />
+        </div>
+      )}
     </div>
   );
 }
