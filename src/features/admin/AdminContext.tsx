@@ -7,7 +7,6 @@ import type {
   AdminArtworkList,
   FailedMintOperation,
   SystemHealthStatus,
-  UpdateUserRolePayload,
   AdminAuditLogList,
   UserRole,
 } from './types';

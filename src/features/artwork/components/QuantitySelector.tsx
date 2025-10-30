@@ -55,7 +55,7 @@ export function QuantitySelector({
             disabled={disabled || quantity <= 1}
             variant="ghost"
             size="sm"
-            className="px-3 py-2"
+            className="px-3 min-h-11"
           >
             -
           </Button>
@@ -66,14 +66,15 @@ export function QuantitySelector({
             value={quantity}
             onChange={handleInputChange}
             disabled={disabled}
-            className="w-16 text-center border-x py-2 focus:outline-none"
+            inputMode="numeric"
+            className="w-16 text-center text-base border-x min-h-11 focus:outline-none"
           />
           <Button
             onClick={handleIncrease}
             disabled={disabled || quantity >= maxQuantity}
             variant="ghost"
             size="sm"
-            className="px-3 py-2"
+            className="px-3 min-h-11"
           >
             +
           </Button>

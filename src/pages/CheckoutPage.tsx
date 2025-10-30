@@ -162,19 +162,19 @@ export function CheckoutPage() {
           {purchaseOption !== 'digital' && (
             <div className="bg-white rounded-lg border p-6">
               <h3 className="text-lg font-semibold mb-4">Shipping information</h3>
-              <div className="grid gap-2">
+              <div className="grid gap-3">
                 <TextField value={shippingAddress.fullName} onChange={(e) => handleShippingChange('fullName', e.target.value)} placeholder="Full name" />
                 <TextField value={shippingAddress.addressLine1} onChange={(e) => handleShippingChange('addressLine1', e.target.value)} placeholder="Address line 1" />
                 <TextField value={shippingAddress.addressLine2} onChange={(e) => handleShippingChange('addressLine2', e.target.value)} placeholder="Address line 2 (optional)" />
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <TextField value={shippingAddress.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="City" />
                   <TextField value={shippingAddress.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder="State" />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <TextField value={shippingAddress.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="Postal code" />
+                <div className="grid grid-cols-2 gap-3">
+                  <TextField value={shippingAddress.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="Postal code" inputMode="numeric" />
                   <TextField value={shippingAddress.country} onChange={(e) => handleShippingChange('country', e.target.value)} placeholder="Country" />
                 </div>
-                <TextField value={shippingAddress.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="Phone (optional)" />
+                <TextField value={shippingAddress.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="Phone (optional)" inputMode="tel" />
               </div>
             </div>
           )}

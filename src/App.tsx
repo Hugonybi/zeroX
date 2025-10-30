@@ -15,8 +15,10 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { UnauthorizedPage } from "./pages/UnauthorizedPage";
 import { OrderStatusPage } from "./pages/OrderStatusPage";
+import { PurchaseHistoryPage } from "./pages/PurchaseHistoryPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthDebug } from "./components/AuthDebug";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function NotFound() {
   return (
@@ -30,10 +32,11 @@ function NotFound() {
 
 function App() {
   return (
-    <BrowserRouter>
-      {/* Debug component - remove in production */}
-      {import.meta.env.DEV && <AuthDebug />}
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        {/* Debug component - remove in production */}
+        {import.meta.env.DEV && <AuthDebug />}
+        <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -74,6 +77,14 @@ function App() {
             <Route path="system" element={<div>System Health - Coming Soon</div>} />
           </Route>
           <Route
+            path="orders"
+            element={
+              <ProtectedRoute>
+                <PurchaseHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="orders/:orderId"
             element={
               <ProtectedRoute>
@@ -96,6 +107,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

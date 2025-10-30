@@ -67,9 +67,10 @@ export function FilterPanel({ filters, onFiltersChange, onReset }: FilterPanelPr
                 priceRange: [Number(e.target.value) * 100, localFilters.priceRange[1]],
               })
             }
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md min-h-11 text-base"
+            inputMode="numeric"
           />
-          <span>-</span>
+          <span className="text-gray-400">-</span>
           <input
             type="number"
             placeholder="Max"
@@ -80,7 +81,8 @@ export function FilterPanel({ filters, onFiltersChange, onReset }: FilterPanelPr
                 priceRange: [localFilters.priceRange[0], Number(e.target.value) * 100],
               })
             }
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border rounded-md min-h-11 text-base"
+            inputMode="numeric"
           />
         </div>
         <p className="text-xs text-gray-500">
@@ -89,7 +91,7 @@ export function FilterPanel({ filters, onFiltersChange, onReset }: FilterPanelPr
         </p>
       </div>
 
-      <Button onClick={handleApply} className="w-full" variant="primary">
+      <Button onClick={handleApply} className="w-full min-h-11" variant="primary">
         Apply Filters
       </Button>
     </div>

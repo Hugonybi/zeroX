@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, type ReactNode } from 'react';
 import { Button } from '../ui/Button';
 
 interface AdminErrorBoundaryState {
@@ -83,7 +83,7 @@ export class AdminErrorBoundary extends Component<AdminErrorBoundaryProps, Admin
             </p>
 
             {/* Error Details (Development Only) */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div className="mb-6 p-4 bg-gray-100 rounded-lg text-left">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Error Details:</h3>
                 <pre className="text-xs text-gray-600 whitespace-pre-wrap break-words">

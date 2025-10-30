@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/hooks';
 import { AdminPermissionError } from '../../features/admin/errors';
@@ -13,16 +13,9 @@ interface AdminRouteGuardProps {
 export function AdminRouteGuard({ 
   children, 
   requiredPermission,
-  fallbackPath = '/unauthorized' 
 }: AdminRouteGuardProps) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  const [permissionError, setPermissionError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    // Clear permission error when route changes
-    setPermissionError(null);
-  }, [location.pathname]);
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -47,7 +40,7 @@ export function AdminRouteGuard({
     
     return (
       <AdminErrorBoundary
-        fallback={(error, resetError) => (
+        fallback={() => (
           <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
@@ -103,7 +96,7 @@ export function AdminRouteGuard({
       
       return (
         <AdminErrorBoundary
-          fallback={(error, resetError) => (
+          fallback={() => (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
               <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
@@ -128,7 +121,7 @@ export function AdminRouteGuard({
                   </button>
                   
                   <button
-                    onClick={resetError}
+                    onClick={() => window.location.reload()}
                     className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Try Again

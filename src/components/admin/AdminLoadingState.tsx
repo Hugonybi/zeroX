@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface AdminLoadingStateProps {
   type?: 'dashboard' | 'table' | 'form' | 'card' | 'full-page';
   message?: string;

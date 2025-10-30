@@ -117,32 +117,34 @@ export function AdminAuditLog({ className = '' }: AdminAuditLogProps) {
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-stone/10 rounded-lg">
-        <TextField
-          label="Action Filter"
-          value={actionFilter}
-          onChange={(e) => {
-            setActionFilter(e.target.value);
-            handleFilterChange();
-          }}
-          placeholder="e.g., user_role_change"
-          size="sm"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Action Filter</label>
+          <TextField
+            value={actionFilter}
+            onChange={(e) => {
+              setActionFilter(e.target.value);
+              handleFilterChange();
+            }}
+            placeholder="e.g., user_role_change"
+          />
+        </div>
         
-        <SelectField
-          label="Entity Type"
-          value={entityTypeFilter}
-          onChange={(e) => {
-            setEntityTypeFilter(e.target.value);
-            handleFilterChange();
-          }}
-          size="sm"
-        >
-          <option value="">All Types</option>
-          <option value="admin_action">Admin Actions</option>
-          <option value="user">User</option>
-          <option value="order">Order</option>
-          <option value="artwork">Artwork</option>
-        </SelectField>
+        <div>
+          <label className="block text-sm font-medium mb-1">Entity Type</label>
+          <SelectField
+            value={entityTypeFilter}
+            onChange={(e) => {
+              setEntityTypeFilter(e.target.value);
+              handleFilterChange();
+            }}
+          >
+            <option value="">All Types</option>
+            <option value="admin_action">Admin Actions</option>
+            <option value="user">User</option>
+            <option value="order">Order</option>
+            <option value="artwork">Artwork</option>
+          </SelectField>
+        </div>
 
         <div className="flex items-end">
           <Button
@@ -221,6 +223,8 @@ export function AdminAuditLog({ className = '' }: AdminAuditLogProps) {
             currentPage={page}
             totalPages={Math.ceil(auditLogs.total / limit)}
             onPageChange={setPage}
+            totalItems={auditLogs.total}
+            itemsPerPage={limit}
           />
 
           {/* Results Info */}
