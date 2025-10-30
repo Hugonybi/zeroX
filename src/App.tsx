@@ -8,6 +8,7 @@ import { CertificatePage } from "./pages/CertificatePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { UnauthorizedPage } from "./pages/UnauthorizedPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function NotFound() {
@@ -26,6 +27,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route element={<RootLayout />}>
           <Route index element={<GalleryPage />} />
           <Route path="artworks/:artworkId" element={<ArtworkDetailPage />} />

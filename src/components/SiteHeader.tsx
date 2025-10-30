@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { Badge } from "./ui/Badge";
 import { useAuth } from "../features/auth/hooks";
 
 const publicLinks = [
@@ -68,9 +69,14 @@ export function SiteHeader() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <span className="text-xs text-ink">
-                Welcome, {user?.name}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-ink">
+                  Welcome, {user?.name}
+                </span>
+                <Badge tone={user?.role === 'admin' ? 'success' : user?.role === 'artist' ? 'info' : 'neutral'}>
+                  <span className="capitalize text-[10px]">{user?.role}</span>
+                </Badge>
+              </div>
               <button
                 type="button"
                 onClick={signOut}

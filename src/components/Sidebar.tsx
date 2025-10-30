@@ -1,8 +1,31 @@
 import { NavLink, type NavLinkRenderProps } from "react-router-dom";
 import { Button } from "./ui/Button";
 import { TextField } from "./ui/TextField";
+import { useAuth } from "../features/auth/hooks";
+
+const publicLinks = [
+  { to: "/", label: "Browse" },
+];
+
+const authenticatedLinks = [
+  { to: "/", label: "Browse" },
+  { to: "/artists", label: "Artists", roles: ['artist'] as string[] },
+  { to: "/admin", label: "Admin", roles: ['admin'] as string[] },
+];
 
 export function Sidebar() {
+  const { user, isAuthenticated } = useAuth();
+
+  const getVisibleLinks = () => {
+    if (!isAuthenticated || !user) return publicLinks;
+
+    return authenticatedLinks.filter(link => 
+      !link.roles || link.roles.includes(user.role)
+    );
+  };
+
+  const links = getVisibleLinks();
+
   return (
     <aside className="flex w-full max-w-xs flex-col gap-8">
       <div className="space-y-4">
@@ -23,11 +46,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-ink-muted">
-        {[
-          { to: "/", label: "Browse" },
-          { to: "/artists", label: "Artists" },
-          { to: "/admin", label: "Admin" },
-        ].map(({ to, label }) => (
+        {links.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
