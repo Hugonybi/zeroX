@@ -85,11 +85,13 @@ export function ArtworkDetailPage() {
           ) : null}
         </div>
         <ArtworkDetails
+          artworkId={artwork.id}
           editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}
           title={artwork.title}
           artist={artwork.artistName ?? "Unknown artist"}
           price={formatPrice(artwork.priceCents, artwork.currency)}
           tokenId={`0.0.${artwork.id.slice(-4)}`}
+          status={artwork.status}
         />
       </div>
     </section>
