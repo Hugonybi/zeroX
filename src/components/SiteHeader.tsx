@@ -9,7 +9,7 @@ const publicLinks = [
 const authenticatedLinks = [
   { to: "/", label: "Store" },
   { to: "/profile", label: "Profile" },
-  { to: "/artists", label: "Dashboard", roles: ['artist'] as string[] },
+  { to: "/artists", label: "Post Artwork", roles: ['artist'] as string[] },
 ];
 
 export function SiteHeader() {

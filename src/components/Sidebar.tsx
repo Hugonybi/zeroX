@@ -10,7 +10,7 @@ const publicLinks = [
 const authenticatedLinks = [
   { to: "/", label: "Browse" },
   { to: "/orders", label: "My Orders", roles: ['buyer', 'artist', 'admin'] as string[] },
-  { to: "/artists", label: "Artists", roles: ['artist'] as string[] },
+  { to: "/artists", label: "Post Artwork", roles: ['artist'] as string[] },
   { to: "/admin", label: "Admin", roles: ['admin'] as string[] },
 ];
 

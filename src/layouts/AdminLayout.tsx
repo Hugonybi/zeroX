@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { AdminProvider } from '../features/admin/AdminContext';
 import { AdminNotificationProvider } from '../features/admin/AdminNotificationContext';
 import { AdminErrorBoundary } from '../components/admin/AdminErrorBoundary';
@@ -55,18 +55,20 @@ interface AdminNavLinkProps {
 }
 
 function AdminNavLink({ to, label }: AdminNavLinkProps) {
-  const isActive = window.location.pathname === to;
-  
+  // Fix: Use NavLink from react-router-dom for proper SPA navigation
+  // Using <a href> causes full page reload and can lose state
   return (
-    <a
-      href={to}
-      className={`text-sm font-medium transition-colors ${
-        isActive
-          ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
-          : 'text-gray-600 hover:text-gray-900'
-      }`}
+    <NavLink
+      to={to}
+      className={({ isActive }: { isActive: boolean }) =>
+        `text-sm font-medium transition-colors ${
+          isActive
+            ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+            : 'text-gray-600 hover:text-gray-900'
+        }`
+      }
     >
       {label}
-    </a>
+    </NavLink>
   );
 }

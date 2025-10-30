@@ -188,6 +188,8 @@ export class OrdersService {
       priceCents: order.amountCents,
       currency: order.currency,
       type: order.artwork.type,
+      // Artist-defined serial number (e.g., "ART-2024-001" or "Edition 5 of 10")
+      // This is different from the Hedera NFT serial which is auto-assigned during minting
       serialNumber: order.artwork.serialNumber,
       edition: order.artwork.edition,
     };

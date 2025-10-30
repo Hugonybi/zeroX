@@ -76,8 +76,9 @@ model Artwork {
   type            ArtworkType
   mediaUrl        String
   metadataUrl     String?
-  serialNumber    String?
-  edition         Int?
+  // Artist-defined identifiers (independent of Hedera NFT serials)
+  serialNumber    String?          // Artist's catalog number (e.g., "ART-2024-001", "Limited Edition 5/10")
+  edition         Int?             // Edition number if part of a series (e.g., 5 of 10)
   priceCents      Int
   currency        String
   status          ArtworkStatus    @default(draft)
@@ -151,9 +152,9 @@ model AuthToken {
   artworkId       String
   order           Order           @relation(fields: [orderId], references: [id])
   orderId         String          @unique
-  hederaTokenId   String
-  hederaTxHash    String
-  metadataIpfs    String
+  hederaTokenId   String          // Format: "CollectionID/Serial" (e.g., "0.0.7145131/5")
+  hederaTxHash    String          // Hedera transaction hash
+  metadataIpfs    String          // IPFS URL containing certificate metadata
   mintedBy        String
   mintedAt        DateTime        @default(now())
   ownershipTokens OwnershipToken[]
@@ -169,11 +170,11 @@ model OwnershipToken {
   orderId              String     @unique
   authenticityToken    AuthToken  @relation(fields: [authenticityTokenId], references: [id])
   authenticityTokenId  String
-  hederaTokenId        String
-  hederaTxHash         String
-  metadataIpfs         String
+  hederaTokenId        String     // Format: "CollectionID/Serial" (e.g., "0.0.7141105/5")
+  hederaTxHash         String     // Hedera transaction hash
+  metadataIpfs         String     // IPFS URL with ownership metadata (includes artwork serial)
   transferable         Boolean    @default(true)
-  fractions            Int        @default(1)
+  fractions            Int        @default(1)  // For future fractionalization
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 }

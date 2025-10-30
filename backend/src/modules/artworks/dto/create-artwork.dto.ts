@@ -19,14 +19,15 @@ export class CreateArtworkDto {
   @IsString()
   metadataUrl?: string;
 
+  // Artist-defined identifiers (independent of Hedera NFT serials)
   @IsOptional()
   @IsString()
-  serialNumber?: string;
+  serialNumber?: string; // Artist's catalog number (e.g., "ART-2024-001", "Limited Edition 5/10")
 
   @IsOptional()
   @IsInt()
   @Min(1)
-  edition?: number;
+  edition?: number; // Edition number if part of series (e.g., 5 means "Edition 5 of X")
 
   @IsInt()
   @Min(1)

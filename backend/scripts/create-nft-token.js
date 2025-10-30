@@ -3,8 +3,18 @@
 /**
  * Hedera NFT Token Creation Script
  * 
- * This script creates an NFT token on Hedera testnet that will be used
+ * This script creates an NFT token COLLECTION on Hedera testnet that will be used
  * for minting authenticity certificates for artwork purchases.
+ * 
+ * IMPORTANT: This creates a COLLECTION, not individual NFTs
+ * - Each artwork purchase will mint a new NFT with an auto-incremented serial (1, 2, 3, etc.)
+ * - The serial number is assigned by Hedera and indicates mint order across ALL artworks
+ * - This is separate from any artist-defined edition numbers or catalog IDs
+ * 
+ * Example: If you mint 3 artworks, you'll get:
+ *   - Artwork A → Token 0.0.xxxxx/1
+ *   - Artwork B → Token 0.0.xxxxx/2
+ *   - Artwork C (Edition 1 of 5) → Token 0.0.xxxxx/3 (metadata contains "Edition 1")
  * 
  * Prerequisites:
  * 1. Set up a Hedera testnet account
@@ -77,11 +87,13 @@ async function createNftToken() {
     const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     const tokenId = tokenCreateRx.tokenId;
 
-    console.log(`✅ NFT Token created successfully!`);
+    console.log(`✅ NFT Token Collection created successfully!`);
     console.log(`Token ID: ${tokenId}`);
+    console.log(`\n📝 This is a TOKEN COLLECTION, not an individual NFT.`);
+    console.log(`   Each artwork purchase will mint a new NFT with serial /1, /2, /3, etc.`);
     console.log(`\nAdd this to your .env file:`);
     console.log(`HEDERA_NFT_TOKEN_ID="${tokenId}"`);
-    console.log(`\nYou can view your token at:`);
+    console.log(`\nYou can view your token collection at:`);
     console.log(`https://hashscan.io/testnet/token/${tokenId}`);
 
   } catch (error) {

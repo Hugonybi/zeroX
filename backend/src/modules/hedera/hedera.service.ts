@@ -42,6 +42,17 @@ export class HederaService {
     }
   }
 
+  /**
+   * Mint a unique NFT (Non-Fungible Token) on Hedera
+   * 
+   * @param tokenId - The Hedera token collection ID (e.g., "0.0.7145131")
+   * @param metadata - Metadata buffer (typically IPFS URL, must be under 100 bytes)
+   * @returns Transaction ID and auto-assigned serial numbers
+   * 
+   * Note: Hedera automatically assigns sequential serial numbers (1, 2, 3, etc.)
+   * across ALL NFTs in this collection, regardless of which artwork they represent.
+   * This is standard NFT behavior - the serial indicates mint order, not artwork edition.
+   */
   async mintUniqueToken(tokenId: string, metadata: Buffer): Promise<{ transactionId: string; serialNumbers: number[] }> {
     const maxAttempts = this.resolveNumberConfig('hedera.mintMaxAttempts', 3, 1);
     const retryDelayMs = this.resolveNumberConfig('hedera.retryDelayMs', 1000, 0);
@@ -57,6 +68,7 @@ export class HederaService {
 
         this.logger.log(`Minted NFT for token ${tokenId} with status ${receipt.status.toString()} (attempt ${attempt})`);
 
+        // Return auto-assigned serial numbers from Hedera
         return {
           transactionId: response.transactionId.toString(),
           serialNumbers: receipt.serials.map(serial => serial.toNumber())
