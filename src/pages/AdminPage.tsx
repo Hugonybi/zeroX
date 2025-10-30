@@ -11,7 +11,7 @@ export function AdminPage() {
   const { refreshAll } = useAdminContext();
   const { data: dashboardStats, isLoading: dashboardLoading, error: dashboardError, refetch: refetchDashboard } = useAdminDashboard();
   const { data: systemHealth, error: systemHealthError, refetch: refetchSystemHealth } = useAdminSystemHealth();
-  const { showError, showInfo } = useAdminNotifications();
+  const { showError } = useAdminNotifications();
 
   // Load initial data
   useEffect(() => {

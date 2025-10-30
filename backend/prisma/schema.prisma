@@ -64,6 +64,7 @@ model User {
   orders          Order[]          @relation("BuyerOrders")
   ownershipTokens OwnershipToken[]
   refreshTokens   RefreshToken[]
+  artistProfile   ArtistProfile?
 }
 
 model Artwork {
@@ -80,11 +81,33 @@ model Artwork {
   priceCents      Int
   currency        String
   status          ArtworkStatus    @default(draft)
+  
+  // Enhanced fields for MVP shopping experience
+  medium          String?
+  category        String?
+  tags            String[]         @default([])
+  yearCreated     Int?
+  dimensionHeight Float?
+  dimensionWidth  Float?
+  dimensionDepth  Float?
+  dimensionUnit   String?          @default("cm")
+  
+  // Inventory management
+  isUnique        Boolean          @default(true)
+  totalQuantity   Int              @default(1)
+  availableQuantity Int            @default(1)
+  reservedQuantity  Int            @default(0)
+  
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   orders          Order[]
   authTokens      AuthToken[]
   ownershipTokens OwnershipToken[]
+  
+  @@index([status])
+  @@index([artistId])
+  @@index([priceCents])
+  @@index([category])
 }
 
 model Order {
@@ -99,10 +122,27 @@ model Order {
   paymentStatus  PaymentStatus   @default(pending)
   orderStatus    OrderStatus     @default(created)
   reference      String          @unique
+  
+  // Enhanced checkout fields
+  quantity       Int             @default(1)
+  unitPriceCents Int?
+  shippingCents  Int             @default(0)
+  taxCents       Int             @default(0)
+  totalCents     Int?
+  
+  // Shipping information
+  shippingAddress Json?
+  shippingMethod  String?
+  trackingNumber  String?
+  
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   authToken      AuthToken?
   ownershipToken OwnershipToken?
+  
+  @@index([buyerId])
+  @@index([artworkId])
+  @@index([orderStatus])
 }
 
 model AuthToken {
@@ -160,4 +200,32 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+model ArtistProfile {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String   @unique
+  displayName   String?
+  bio           String?
+  profileImage  String?
+  
+  // Social and professional links
+  website       String?
+  instagram     String?
+  twitter       String?
+  
+  // Professional information
+  education     String?
+  exhibitions   String[]  @default([])
+  awards        String[]  @default([])
+  
+  // Platform statistics
+  totalSales    Int       @default(0)
+  averageRating Float?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([userId])
 }

@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArtworkDetails } from "../components/ArtworkDetails";
+import { ArtworkSpecifications } from "../features/artwork/components/ArtworkSpecifications";
 import { API_BASE_URL, USE_MOCK_ARTWORKS } from "../config/api";
 import { createHttpClient } from "../lib/http";
 import type { Artwork } from "../types/artwork";
@@ -79,19 +80,37 @@ export function ArtworkDetailPage() {
       </Link>
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
-        <div className="aspect-4/5 w-full rounded-3xl bg-stone/40 shadow-brand">
-          {artwork.mediaUrl ? (
-            <img src={artwork.mediaUrl} alt={artwork.title} className="h-full w-full object-cover" />
-          ) : null}
+        <div className="space-y-6">
+          <div className="aspect-4/5 w-full rounded-3xl bg-stone/40 shadow-brand overflow-hidden">
+            {artwork.mediaUrl ? (
+              <img src={artwork.mediaUrl} alt={artwork.title} className="h-full w-full object-cover" />
+            ) : null}
+          </div>
+          
+          {/* Artwork Description */}
+          {artwork.description && (
+            <div className="prose prose-sm max-w-none">
+              <h3 className="text-lg font-semibold mb-2">About this artwork</h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{artwork.description}</p>
+            </div>
+          )}
+          
+          {/* Artwork Specifications */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Specifications</h3>
+            <ArtworkSpecifications artwork={artwork} showFullDetails />
+          </div>
         </div>
+        
         <ArtworkDetails
           artworkId={artwork.id}
           editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}
           title={artwork.title}
-          artist={artwork.artistName ?? "Unknown artist"}
+          artist={artwork.artistName ?? artwork.artist?.name ?? "Unknown artist"}
           price={formatPrice(artwork.priceCents, artwork.currency)}
           tokenId={`0.0.${artwork.id.slice(-4)}`}
           status={artwork.status}
+          artwork={artwork}
         />
       </div>
     </section>

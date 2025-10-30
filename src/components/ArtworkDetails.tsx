@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { PurchaseOptionCard } from "./ui/PurchaseOptionCard";
+import { QuantitySelector } from "../features/artwork/components/QuantitySelector";
 import { useAuth } from "../features/auth/hooks";
-import { useCheckout } from "../hooks/useCheckout";
+import type { Artwork } from "../types/artwork";
 
 interface ArtworkDetailsProps {
   artworkId: string;
@@ -14,13 +15,22 @@ interface ArtworkDetailsProps {
   price: string;
   tokenId: string;
   status: string;
+  artwork?: Artwork;
 }
 
-export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, tokenId, status }: ArtworkDetailsProps) {
+export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, tokenId, status, artwork }: ArtworkDetailsProps) {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const { checkout, isLoading, error } = useCheckout();
   const [purchaseOption, setPurchaseOption] = useState<'both' | 'digital'>('both');
+  const [quantity, setQuantity] = useState(1);
+  
+  const isSoldOut = status === 'sold' || (artwork && artwork.availableQuantity !== undefined && artwork.availableQuantity <= 0);
+  
+  // Determine if quantity selector should be shown
+  const showQuantitySelector = artwork && 
+    !artwork.isUnique && 
+    artwork.availableQuantity !== undefined && 
+    artwork.availableQuantity > 1;
 
   const handleBuyNow = async () => {
     // Check authentication
@@ -36,23 +46,12 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
       alert('Only buyers can purchase artworks. Please register as a buyer.');
       return;
     }
-
-    // Create checkout session with test provider (demo mode)
-    const result = await checkout({
-      artworkId,
-      paymentProvider: 'test', // Using test provider for demo
-    });
-
-    if (result) {
-      // Store order ID
-      sessionStorage.setItem('currentOrderId', result.order.id);
-      
-      // For test provider, directly complete the order
-      console.log('✅ Checkout created with test provider:', result.order.id);
-      
-      // Navigate to order status page
-      navigate(`/orders/${result.order.id}`);
-    }
+    // Navigate to checkout page where user can confirm shipping, quantity and pay
+    const params = new URLSearchParams();
+    params.set('artworkId', artworkId);
+    params.set('quantity', String(quantity));
+    params.set('purchaseOption', purchaseOption);
+    navigate(`/checkout?${params.toString()}`);
   };
 
   return (
@@ -60,9 +59,15 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
       <div className="space-y-1">
         <p className="text-xs uppercase tracking-[0.35em] text-ink-muted">{editionLabel}</p>
         <h1 className="font-brand text-3xl text-ink">{title}</h1>
-        <a className="text-sm text-ink" href="#artist">
-          by <span className="underline">{artist}</span>
-        </a>
+        {artwork?.artistId ? (
+          <Link to={`/artists/${artwork.artistId}`} className="text-sm text-ink hover:underline">
+            by <span className="underline">{artist}</span>
+          </Link>
+        ) : (
+          <p className="text-sm text-ink">
+            by <span>{artist}</span>
+          </p>
+        )}
         <p className="text-xl font-semibold text-ink">{price}</p>
       </div>
 
@@ -70,6 +75,18 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
         <span className="text-[0.65rem] uppercase tracking-[0.3em]">Authenticated on Hedera</span>
         <span className="text-xs font-semibold">Token ID {tokenId}</span>
       </Badge>
+
+      {/* Quantity Selector */}
+      {showQuantitySelector && (
+        <div>
+          <QuantitySelector
+            artwork={artwork!}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            disabled={isSoldOut}
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.26em] text-ink-muted">Purchase Option</p>
@@ -89,19 +106,12 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
         </div>
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-
       <Button 
         variant="primary" 
         onClick={handleBuyNow}
-        loading={isLoading}
-        disabled={status === 'sold' || isLoading}
+        disabled={isSoldOut}
       >
-        {status === 'sold' ? 'Sold Out' : 'Buy Now'}
+        {isSoldOut ? 'Sold Out' : 'Buy Now'}
       </Button>
     </section>
   );

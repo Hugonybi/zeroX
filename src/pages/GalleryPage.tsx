@@ -1,24 +1,97 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { GalleryHero } from "../components/GalleryHero";
 import { Button } from "../components/ui/Button";
 import { useArtworks } from "../hooks/useArtworks";
+import { SearchBar } from "../features/search/components/SearchBar";
+import { FilterPanel } from "../features/search/components/FilterPanel";
+import { SortControls } from "../features/search/components/SortControls";
+import { useSearch } from "../features/search/hooks/useSearch";
+import type { SearchFilters } from "../features/search/types";
 
 export function GalleryPage() {
   const navigate = useNavigate();
-  const { data: artworks, isLoading, error, refetch } = useArtworks();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { data: artworks, isLoading: isLoadingDefault, error: errorDefault, refetch } = useArtworks();
+  const { results, loading: searchLoading, error: searchError, search } = useSearch();
+  
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "date_desc");
+  const [filters, setFilters] = useState<SearchFilters>({
+    priceRange: [
+      parseInt(searchParams.get("minPrice") || "0"),
+      parseInt(searchParams.get("maxPrice") || "1000000")
+    ],
+    artworkType: (searchParams.get("type") as 'all' | 'physical' | 'digital') || 'all',
+  });
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Determine if we're using search or default browse
+  const isSearching = searchQuery || filters.artworkType !== 'all' || 
+    filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000;
+  
+  const isLoading = isSearching ? searchLoading : isLoadingDefault;
+  const error = isSearching ? searchError : errorDefault;
+  
+  // Use search results or default artworks
+  const currentArtworks = isSearching && results ? results.artworks : artworks;
+
+  // Effect to perform search when query changes
+  useEffect(() => {
+    if (isSearching) {
+      search({
+        query: searchQuery || undefined,
+        minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
+        maxPrice: filters.priceRange[1] < 1000000 ? filters.priceRange[1] : undefined,
+        type: filters.artworkType !== 'all' ? filters.artworkType : undefined,
+        sortBy: sortBy as any,
+      });
+    }
+  }, [searchQuery, filters, sortBy, isSearching, search]);
+
+  // Update URL params
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("q", searchQuery);
+    if (sortBy !== "date_desc") params.set("sort", sortBy);
+    if (filters.artworkType !== 'all') params.set("type", filters.artworkType);
+    if (filters.priceRange[0] > 0) params.set("minPrice", filters.priceRange[0].toString());
+    if (filters.priceRange[1] < 1000000) params.set("maxPrice", filters.priceRange[1].toString());
+    setSearchParams(params, { replace: true });
+  }, [searchQuery, sortBy, filters, setSearchParams]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFiltersChange = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort);
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSortBy("date_desc");
+    setFilters({
+      priceRange: [0, 1000000],
+      artworkType: 'all',
+    });
+  };
 
   const displayArtworks = useMemo(
     () =>
-      artworks.map((artwork) => ({
+      currentArtworks.map((artwork) => ({
         id: artwork.id,
         title: artwork.title,
-        artist: artwork.artistName ?? "Unknown artist",
+        artist: artwork.artistName ?? artwork.artist?.name ?? "Unknown artist",
         price: formatPrice(artwork.priceCents, artwork.currency),
         imageUrl: artwork.mediaUrl,
       })),
-    [artworks]
+    [currentArtworks]
   );
 
   return (
@@ -34,10 +107,71 @@ export function GalleryPage() {
         </div>
       </div>
 
+      {/* Search and Filter Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          <div className="flex-1 w-full lg:w-auto">
+            <SearchBar onSearch={handleSearch} />
+          </div>
+          <div className="flex gap-2 items-center w-full lg:w-auto">
+            <SortControls value={sortBy} onChange={handleSortChange} />
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden"
+            >
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </Button>
+          </div>
+        </div>
+
+        {/* Filter Panel */}
+        <div className={`${showFilters ? 'block' : 'hidden'} lg:block`}>
+          <FilterPanel
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onReset={handleResetFilters}
+          />
+        </div>
+
+        {/* Active Filters Display */}
+        {isSearching && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-gray-600">Active filters:</span>
+            {searchQuery && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                Search: {searchQuery}
+              </span>
+            )}
+            {filters.artworkType !== 'all' && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                Type: {filters.artworkType}
+              </span>
+            )}
+            {(filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                Price: ${filters.priceRange[0] / 100} - ${filters.priceRange[1] / 100}
+              </span>
+            )}
+            <Button variant="ghost" size="sm" onClick={handleResetFilters}>
+              Clear all
+            </Button>
+          </div>
+        )}
+
+        {/* Results Count */}
+        {results && (
+          <div className="text-sm text-gray-600">
+            Found {results.pagination.total} artwork{results.pagination.total !== 1 ? 's' : ''}
+          </div>
+        )}
+      </div>
+
       {error && !displayArtworks.length && (
         <div className="rounded-3xl border border-rose-200 bg-rose-50 px-6 py-5 text-sm text-rose-700">
           <p className="uppercase tracking-[0.35em]">Unable to load artworks</p>
-          <p className="mt-2 text-rose-600/80">{error.message}</p>
+          <p className="mt-2 text-rose-600/80">{typeof error === 'string' ? error : error?.message || 'Unknown error'}</p>
           <Button
             variant="ghost"
             size="sm"

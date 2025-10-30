@@ -5,8 +5,10 @@ import { AdminPage } from "./pages/AdminPage";
 import { AdminUserManagementPage } from "./pages/AdminUserManagementPage";
 import { AdminMonitoringPage } from "./pages/AdminMonitoringPage";
 import { ArtistsPage } from "./pages/ArtistsPage";
+import { ArtistProfilePage } from "./pages/ArtistProfilePage";
 import { ArtworkDetailPage } from "./pages/ArtworkDetailPage";
 import { GalleryPage } from "./pages/GalleryPage";
+import { CheckoutPage } from "./pages/CheckoutPage";
 import { CertificatePage } from "./pages/CertificatePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -38,6 +40,8 @@ function App() {
         <Route element={<RootLayout />}>
           <Route index element={<GalleryPage />} />
           <Route path="artworks/:artworkId" element={<ArtworkDetailPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="artists/:artistId" element={<ArtistProfilePage />} />
           <Route
             path="artists"
             element={

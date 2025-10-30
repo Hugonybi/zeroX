@@ -15,6 +15,7 @@ import { IpfsModule } from '@modules/ipfs/ipfs.module';
 import { HederaModule } from '@modules/hedera/hedera.module';
 import { TokenizationModule } from '@modules/tokenization/tokenization.module';
 import { AdminModule } from '@modules/admin/admin.module';
+import { ArtistsModule } from '@modules/artists/artists.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { AdminModule } from '@modules/admin/admin.module';
     IpfsModule,
     HederaModule,
     TokenizationModule,
-    AdminModule
+    AdminModule,
+    ArtistsModule
   ],
   providers: [
     // Apply rate limiting globally

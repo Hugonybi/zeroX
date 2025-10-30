@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { AdminProvider } from '../features/admin/AdminContext';
 import { AdminNotificationProvider } from '../features/admin/AdminNotificationContext';

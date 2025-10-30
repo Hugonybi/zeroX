@@ -36,6 +36,12 @@ export class ArtworksController {
 export class MarketplaceController {
   constructor(private readonly artworksService: ArtworksService) {}
 
+  @Get('search')
+  search(@Query() searchDto: any) {
+    // Import and use SearchArtworksDto for proper validation
+    return this.artworksService.searchArtworks(searchDto);
+  }
+
   @Get()
   browse(
     @Query('type') type?: string,
