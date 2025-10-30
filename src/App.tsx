@@ -11,6 +11,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { UnauthorizedPage } from "./pages/UnauthorizedPage";
 import { OrderStatusPage } from "./pages/OrderStatusPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AuthDebug } from "./components/AuthDebug";
 
 function NotFound() {
   return (
@@ -25,6 +26,8 @@ function NotFound() {
 function App() {
   return (
     <BrowserRouter>
+      {/* Debug component - remove in production */}
+      {import.meta.env.DEV && <AuthDebug />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
