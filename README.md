@@ -2,6 +2,9 @@
 
 > 🏆 [View Hedera Certification](https://drive.google.com/file/d/1tDTYvuTQ4h7LX9OQONDA2Kzt-0LyfTfZ/view?usp=sharing)
 
+
+> 🏆 [Pitch Deck](https://docs.google.com/presentation/d/1a104EqlB6hPzeADcOWXvzMWrQvHcE7ZF/edit?slide=id.p1#slide=id.p1)
+
 ## Elevator Pitch
 
 A fiat-first art marketplace connecting artists with global collectors, automatically issuing Hedera-backed authenticity certificates (NFT-like tokens) after every successful payment—no crypto wallets required.
