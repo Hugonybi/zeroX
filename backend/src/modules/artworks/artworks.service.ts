@@ -4,6 +4,7 @@ import { ArtworkStatus, Prisma, Artwork } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
+import { SearchArtworksDto } from './dto/search-artworks.dto';
 
 @Injectable()
 export class ArtworksService {
@@ -58,7 +59,19 @@ export class ArtworksService {
         edition: dto.edition,
         priceCents: dto.priceCents,
         currency: dto.currency,
-        status: dto.status ?? ArtworkStatus.draft
+        status: dto.status ?? ArtworkStatus.draft,
+        // Enhanced fields
+        medium: dto.medium,
+        category: dto.category,
+        tags: dto.tags || [],
+        yearCreated: dto.yearCreated,
+        dimensionHeight: dto.dimensionHeight,
+        dimensionWidth: dto.dimensionWidth,
+        dimensionDepth: dto.dimensionDepth,
+        dimensionUnit: dto.dimensionUnit || 'cm',
+        isUnique: dto.isUnique ?? true,
+        totalQuantity: dto.totalQuantity ?? 1,
+        availableQuantity: dto.availableQuantity ?? (dto.totalQuantity ?? 1),
       }
     });
     return this.transformArtwork(artwork);
@@ -119,5 +132,174 @@ export class ArtworksService {
       throw new NotFoundException('Artwork not found');
     }
     return this.transformArtwork(artwork);
+  }
+
+  async searchArtworks(dto: SearchArtworksDto) {
+    const {
+      query,
+      minPrice,
+      maxPrice,
+      type,
+      category,
+      artistId,
+      sortBy = 'date_desc',
+      page = 1,
+      limit = 20,
+    } = dto;
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: Prisma.ArtworkWhereInput = {
+      status: ArtworkStatus.published,
+    };
+
+    // Text search on title, description, and artist name
+    if (query) {
+      where.OR = [
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { medium: { contains: query, mode: 'insensitive' } },
+        { category: { contains: query, mode: 'insensitive' } },
+        { tags: { has: query } },
+        {
+          artist: {
+            name: { contains: query, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
+
+    // Price range filter
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.priceCents = {};
+      if (minPrice !== undefined) {
+        where.priceCents.gte = minPrice;
+      }
+      if (maxPrice !== undefined) {
+        where.priceCents.lte = maxPrice;
+      }
+    }
+
+    // Type filter
+    if (type) {
+      where.type = type;
+    }
+
+    // Category filter
+    if (category) {
+      where.category = category;
+    }
+
+    // Artist filter
+    if (artistId) {
+      where.artistId = artistId;
+    }
+
+    // Build orderBy clause
+    let orderBy: Prisma.ArtworkOrderByWithRelationInput = {};
+    switch (sortBy) {
+      case 'price_asc':
+        orderBy = { priceCents: 'asc' };
+        break;
+      case 'price_desc':
+        orderBy = { priceCents: 'desc' };
+        break;
+      case 'date_asc':
+        orderBy = { createdAt: 'asc' };
+        break;
+      case 'title_asc':
+        orderBy = { title: 'asc' };
+        break;
+      case 'date_desc':
+      default:
+        orderBy = { createdAt: 'desc' };
+    }
+
+    // Execute query with pagination
+    const [artworks, total] = await Promise.all([
+      this.prisma.artwork.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+        include: {
+          artist: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      }),
+      this.prisma.artwork.count({ where }),
+    ]);
+
+    return {
+      artworks: artworks.map(artwork => this.transformArtwork(artwork)),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateInventory(artworkId: string, quantityChange: number) {
+    const artwork = await this.findById(artworkId);
+    
+    const newAvailableQuantity = artwork.availableQuantity + quantityChange;
+    
+    if (newAvailableQuantity < 0) {
+      throw new Error('Insufficient inventory');
+    }
+
+    return this.prisma.artwork.update({
+      where: { id: artworkId },
+      data: {
+        availableQuantity: newAvailableQuantity,
+      },
+    });
+  }
+
+  async reserveInventory(artworkId: string, quantity: number) {
+    const artwork = await this.findById(artworkId);
+    
+    if (artwork.availableQuantity < quantity) {
+      throw new Error('Insufficient inventory available');
+    }
+
+    return this.prisma.artwork.update({
+      where: { id: artworkId },
+      data: {
+        availableQuantity: artwork.availableQuantity - quantity,
+        reservedQuantity: artwork.reservedQuantity + quantity,
+      },
+    });
+  }
+
+  async releaseReservedInventory(artworkId: string, quantity: number) {
+    const artwork = await this.findById(artworkId);
+
+    return this.prisma.artwork.update({
+      where: { id: artworkId },
+      data: {
+        availableQuantity: artwork.availableQuantity + quantity,
+        reservedQuantity: Math.max(0, artwork.reservedQuantity - quantity),
+      },
+    });
+  }
+
+  async confirmSale(artworkId: string, quantity: number) {
+    const artwork = await this.findById(artworkId);
+
+    return this.prisma.artwork.update({
+      where: { id: artworkId },
+      data: {
+        reservedQuantity: Math.max(0, artwork.reservedQuantity - quantity),
+      },
+    });
   }
 }

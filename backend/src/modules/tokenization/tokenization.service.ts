@@ -63,14 +63,15 @@ export class TokenizationService {
       }
 
       // Mint the ownership NFT (will be frozen by default)
+      // Note: Hedera auto-assigns a sequential NFT serial (independent of artwork edition)
       // Store only IPFS CID in metadata (under 100 bytes limit)
       const mintResult = await this.hederaService.mintUniqueToken(
         ownershipTokenId,
         Buffer.from(metadataIpfs, 'utf8')
       );
 
-      const serialNumber = mintResult.serialNumbers[0];
-      const fullTokenId = `${ownershipTokenId}/${serialNumber}`;
+      const hederaNftSerial = mintResult.serialNumbers[0];
+      const fullTokenId = `${ownershipTokenId}/${hederaNftSerial}`;
 
       this.logger.log(
         `Successfully minted ownership token ${fullTokenId} for order ${orderId}`
@@ -80,7 +81,7 @@ export class TokenizationService {
         hederaTokenId: fullTokenId,
         hederaTxHash: mintResult.transactionId,
         metadataIpfs,
-        serialNumber
+        serialNumber: hederaNftSerial
       };
     } catch (error) {
       this.logger.error(`Failed to mint ownership token for order ${orderId}`, error);
@@ -90,14 +91,18 @@ export class TokenizationService {
 
   /**
    * Create structured ownership metadata following HIP-412 and RWA best practices
+   * 
+   * Note: This metadata includes both:
+   * 1. Hedera NFT serials (auto-assigned sequential numbers across ALL artworks in collection)
+   * 2. Artwork edition/serial (artist-defined identifiers for the physical/digital piece)
    */
   createOwnershipMetadata(order: any, authToken: any): OwnershipMetadata {
     const artwork = order.artwork;
     const artist = artwork.artist;
     const buyer = order.buyer;
 
-    // Extract serial number from auth token ID (format: 0.0.xxxxx/serial)
-    const authTokenSerial = authToken.hederaTokenId.split('/')[1] || '1';
+    // Extract Hedera NFT serial from authenticity token ID (format: 0.0.xxxxx/serial)
+    const authTokenHederaSerial = authToken.hederaTokenId.split('/')[1] || '1';
 
     return {
       name: `${artwork.title} - Ownership Certificate`,
@@ -106,9 +111,10 @@ export class TokenizationService {
       type: artwork.mediaUrl.includes('.mp4') ? 'video/mp4' : 'image/jpeg',
       properties: {
         asset_type: artwork.type === 'physical' ? 'physical_artwork' : 'digital_artwork',
+        // Reference to the linked authenticity certificate NFT
         authenticity_token: {
           token_id: authToken.hederaTokenId.split('/')[0],
-          serial: authTokenSerial,
+          serial: authTokenHederaSerial, // Hedera NFT serial (auto-assigned)
           ipfs: authToken.metadataIpfs
         },
         ownership: {
@@ -116,6 +122,12 @@ export class TokenizationService {
           fractions: 1,
           // Future: Add legal document hash here
           legal_doc_hash: undefined
+        },
+        // Artist-defined artwork identification
+        artwork_details: {
+          serial_number: artwork.serialNumber, // Artist's catalog/edition number (e.g., "ART-2024-001")
+          edition: artwork.edition,            // Edition number if part of series (e.g., 5 of 10)
+          is_unique: !artwork.edition || artwork.edition === 1
         },
         provenance: [
           {

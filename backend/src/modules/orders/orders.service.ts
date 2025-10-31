@@ -23,31 +23,81 @@ export class OrdersService {
       throw new NotFoundException('Artwork not found');
     }
 
+    // Determine quantity
+    const quantity = dto.quantity || 1;
+
+    // Check inventory availability
+    if (artwork.availableQuantity < quantity) {
+      throw new Error(`Insufficient inventory. Only ${artwork.availableQuantity} available.`);
+    }
+
+    // Calculate pricing
+    const unitPriceCents = artwork.priceCents;
+    const subtotalCents = unitPriceCents * quantity;
+    const shippingCents = dto.shippingMethod ? this.calculateShipping(dto.shippingMethod, artwork.type) : 0;
+    const taxCents = 0; // Tax calculation can be added later
+    const totalCents = subtotalCents + shippingCents + taxCents;
+
     const reference = randomUUID();
+
+    // Reserve inventory
+    await this.prisma.artwork.update({
+      where: { id: artwork.id },
+      data: {
+        availableQuantity: artwork.availableQuantity - quantity,
+        reservedQuantity: artwork.reservedQuantity + quantity,
+      },
+    });
+
     const order = await this.prisma.order.create({
       data: {
         buyerId,
         artworkId: artwork.id,
-        amountCents: artwork.priceCents,
+        amountCents: subtotalCents,
         currency: artwork.currency,
         paymentProvider: dto.paymentProvider,
-        reference
+        reference,
+        quantity,
+        unitPriceCents,
+        shippingCents,
+        taxCents,
+        totalCents,
+        shippingAddress: dto.shippingAddress ? (dto.shippingAddress as any) : undefined,
+        shippingMethod: dto.shippingMethod,
       }
     });
 
     if (dto.paymentProvider === PaymentProvider.paystack) {
       const paystackResponse = await this.paystack.initializeTransaction({
         email: await this.resolveBuyerEmail(buyerId),
-        amount: artwork.priceCents,
+        amount: totalCents,
         currency: artwork.currency,
         reference,
-        metadata: { orderId: order.id, artworkId: artwork.id }
+        metadata: { orderId: order.id, artworkId: artwork.id, quantity }
       });
 
       return { order, payment: paystackResponse };
     }
 
     return { order };
+  }
+
+  private calculateShipping(shippingMethod: string, artworkType: string): number {
+    // Simple shipping calculation - can be enhanced later
+    if (artworkType === 'digital') {
+      return 0;
+    }
+    
+    switch (shippingMethod) {
+      case 'standard':
+        return 1000; // $10 in cents
+      case 'express':
+        return 2500; // $25 in cents
+      case 'international':
+        return 5000; // $50 in cents
+      default:
+        return 0;
+    }
   }
 
   async resolveBuyerEmail(buyerId: string) {
@@ -60,6 +110,39 @@ export class OrdersService {
 
   findByReference(reference: string) {
     return this.prisma.order.findUnique({ where: { reference } });
+  }
+
+  async getOrderById(orderId: string, userId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        artwork: true,
+        buyer: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Verify the user owns this order or is the artist/admin
+    if (order.buyerId !== userId && order.artwork.artistId !== userId) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
+
+  async getOrdersByBuyer(buyerId: string) {
+    return this.prisma.order.findMany({
+      where: { buyerId },
+      include: {
+        artwork: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   updatePaymentStatus(reference: string, paymentStatus: PaymentStatus, orderStatus: OrderStatus) {
@@ -105,6 +188,8 @@ export class OrdersService {
       priceCents: order.amountCents,
       currency: order.currency,
       type: order.artwork.type,
+      // Artist-defined serial number (e.g., "ART-2024-001" or "Edition 5 of 10")
+      // This is different from the Hedera NFT serial which is auto-assigned during minting
       serialNumber: order.artwork.serialNumber,
       edition: order.artwork.edition,
     };

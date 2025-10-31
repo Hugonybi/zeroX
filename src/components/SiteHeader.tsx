@@ -1,40 +1,51 @@
 import { Link, NavLink } from "react-router-dom";
+import { Badge } from "./ui/Badge";
+import { useAuth } from "../features/auth/hooks";
+import { Button } from "./ui/Button";
+import { CartIcon } from "./CartIcon";
 
-const primaryLinks = [
+interface SiteHeaderProps {
+  onToggleCart: () => void;
+}
+
+const publicLinks = [
   { to: "/", label: "Store" },
-  { to: "/artists", label: "Profile" },
 ];
 
-export function SiteHeader() {
+const authenticatedLinks = [
+  { to: "/", label: "Store" },
+  { to: "/wishlist", label: "Wishlist" },
+  { to: "/profile", label: "Profile" },
+  { to: "/artists", label: "Post Artwork", roles: ['artist'] as string[] },
+];
+
+export function SiteHeader({ onToggleCart }: SiteHeaderProps) {
+  const { user, isAuthenticated, signOut } = useAuth();
+
+  const getVisibleLinks = () => {
+    if (!isAuthenticated || !user) return publicLinks;
+
+    return authenticatedLinks.filter(link => 
+      !link.roles || link.roles.includes(user.role)
+    );
+  };
+
+  const links = getVisibleLinks();
+
   return (
-    <header className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-8">
+    <header className="space-y-2 mt-2">
+      <div className="flex items-center justify-between">
+      <div className="flex flex-cols items-center justify-between gap-8">
         <Link to="/" className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-charcoal/20 bg-white font-brand text-2xl">
             ◊
           </span>
           <span className="font-brand text-xl lowercase tracking-[0.3em]">zeroXmods</span>
         </Link>
-              {/* search bar */}
-      <div className="flex flex-wrap items-center justify-between gap-6 ">
-        <label className="flex flex-1 max-w-xl items-center text-xs uppercase tracking-[0.35em] text-ink">
-          <span className="sr-only">Search artworks</span>
-          <input
-            type="search"
-            placeholder="search"
-            className="w-full border-b border-charcoal/40 bg-transparent pb-1 text-xs uppercase tracking-[0.35em] text-ink placeholder:text-charcoal/50 focus:border-ink focus:outline-none"
-          />
-        </label>
-
-        <button
-          type="button"
-          className="text-xs uppercase tracking-[0.35em] text-ink hover:text-emerald-500"
-        >
-          Filter
-        </button>
+      
       </div>
         <nav className="flex flex-wrap items-center gap-8 text-xs font-semibold uppercase tracking-[0.35em] text-ink-muted">
-          {primaryLinks.map(({ to, label }) => (
+          {links.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -48,17 +59,51 @@ export function SiteHeader() {
 
           <span className="hidden h-3 w-px bg-charcoal/20 sm:inline" aria-hidden="true" />
 
-
-            
-          <button type="button" className="text-xs font-semibold lowercase tracking-[0.25em] text-violet-500">
-            sign up
-          </button>
-          <button type="button" className="text-xs font-semibold lowercase tracking-[0.25em] text-emerald-500">
-            login
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <CartIcon onToggleCart={onToggleCart} />
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-ink">
+                  Welcome, {user?.name}
+                </span>
+                <Badge tone={user?.role === 'admin' ? 'success' : user?.role === 'artist' ? 'info' : 'neutral'}>
+                  <span className="capitalize text-[10px]">{user?.role}</span>
+                </Badge>
+              </div>
+              <button
+                type="button"
+                onClick={signOut}
+                className="text-xs font-semibold lowercase tracking-[0.25em] text-red-500 hover:text-red-700"
+              >
+                logout
+              </button>
+            </div>
+          ) : (
+            <>
+                <Button
+                  as="a"
+                  href="/register"
+                  variant="secondary"
+                  size="sm"
+                  className=" decoration-0 hover:bg-violet-700"
+                >
+                  sign up
+                </Button>
+                <Button
+                  as="a"
+                  href="/login"
+                  variant="primary"
+                  size="sm"
+                  className="text-white hover:bg-emerald-700"
+                >
+                  login
+                </Button>
+            </>
+          )}
         </nav>
-      </div>
-    
+        </div>
+      
+
     </header>
   );
 }

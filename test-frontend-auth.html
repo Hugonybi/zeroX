@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auth Debug Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; max-width: 800px; margin: 0 auto; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { color: blue; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Frontend Auth Debug Test</h1>
+  
+  <div id="output"></div>
+  
+  <div>
+    <button onclick="testLogin()">1. Login as Buyer</button>
+    <button onclick="testGetUser()">2. Get Current User</button>
+    <button onclick="testCheckout()">3. Test Checkout</button>
+    <button onclick="showCookies()">4. Show Cookies</button>
+    <button onclick="clearAll()">Clear</button>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:4000';
+    const output = document.getElementById('output');
+
+    function log(message, type = 'info') {
+      const p = document.createElement('p');
+      p.className = type;
+      p.textContent = message;
+      output.appendChild(p);
+    }
+
+    function logJson(obj, type = 'info') {
+      const pre = document.createElement('pre');
+      pre.className = type;
+      pre.textContent = JSON.stringify(obj, null, 2);
+      output.appendChild(pre);
+    }
+
+    async function testLogin() {
+      log('🔐 Attempting login...', 'info');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: 'buyer@test.com',
+            password: 'Test1234!'
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          log(`❌ Login failed: ${response.status}`, 'error');
+          logJson(error, 'error');
+          return;
+        }
+
+        const data = await response.json();
+        log('✅ Login successful!', 'success');
+        logJson(data, 'success');
+        log('Cookies should now be set', 'info');
+        
+      } catch (err) {
+        log(`❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testGetUser() {
+      log('👤 Fetching current user...', 'info');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          log(`❌ Failed to get user: ${response.status}`, 'error');
+          logJson(error, 'error');
+          return;
+        }
+
+        const user = await response.json();
+        log('✅ User fetched successfully!', 'success');
+        logJson(user, 'success');
+        
+        if (user.role !== 'buyer') {
+          log(`⚠️ Warning: User role is "${user.role}", not "buyer"`, 'error');
+        }
+        
+      } catch (err) {
+        log(`❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testCheckout() {
+      log('🛒 Testing checkout...', 'info');
+      
+      try {
+        // First get artworks
+        const artworksResponse = await fetch(`${API_BASE_URL}/artworks`, {
+          credentials: 'include'
+        });
+        
+        if (!artworksResponse.ok) {
+          log('❌ Failed to fetch artworks', 'error');
+          return;
+        }
+        
+        const artworks = await artworksResponse.json();
+        if (!artworks || artworks.length === 0) {
+          log('❌ No artworks available', 'error');
+          return;
+        }
+        
+        const artworkId = artworks[0].id;
+        log(`Using artwork: ${artworks[0].title}`, 'info');
+        
+        // Now test checkout
+        const checkoutResponse = await fetch(`${API_BASE_URL}/checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            artworkId: artworkId,
+            paymentProvider: 'test'
+          })
+        });
+
+        log(`Response status: ${checkoutResponse.status} ${checkoutResponse.statusText}`, 
+            checkoutResponse.ok ? 'success' : 'error');
+        
+        if (!checkoutResponse.ok) {
+          const error = await checkoutResponse.json();
+          log('❌ Checkout failed!', 'error');
+          logJson(error, 'error');
+          return;
+        }
+
+        const result = await checkoutResponse.json();
+        log('✅ Checkout successful!', 'success');
+        logJson(result, 'success');
+        
+      } catch (err) {
+        log(`❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    function showCookies() {
+      log('🍪 Current cookies:', 'info');
+      const cookies = document.cookie;
+      if (!cookies) {
+        log('No cookies found!', 'error');
+      } else {
+        log(cookies, 'success');
+      }
+    }
+
+    function clearAll() {
+      output.innerHTML = '';
+    }
+
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      log('🚀 Page loaded. Click buttons above to test.', 'info');
+      log('Make sure backend is running on http://localhost:4000', 'info');
+      showCookies();
+    });
+  </script>
+</body>
+</html>

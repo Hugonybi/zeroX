@@ -78,20 +78,24 @@ export class MintAuthenticityWorker {
       this.logger.log(`📌 Metadata pinned to IPFS: ${metadataUrl}`);
 
       // Mint the authenticity NFT on Hedera
+      // Note: Hedera will auto-assign a sequential serial number (1, 2, 3, etc.)
+      // This is independent of the artwork's edition/serialNumber field
       // Store only IPFS CID in metadata (under 100 bytes limit)
       this.logger.log(`⛏️ Minting authenticity token on Hedera (token: ${tokenId})...`);
       const mintResult = await this.hederaService.mintUniqueToken(
         tokenId, 
         Buffer.from(metadataUrl, 'utf8')
       );
-      this.logger.log(`✅ Authenticity mint successful! Serial: ${mintResult.serialNumbers[0]}, Tx: ${mintResult.transactionId}`);
+      const hederaNftSerial = mintResult.serialNumbers[0];
+      this.logger.log(`✅ Authenticity mint successful! Hedera NFT Serial: ${hederaNftSerial}, Tx: ${mintResult.transactionId}`);
 
       // Store the authenticity token record
+      // Format: CollectionID/Serial (e.g., "0.0.7145131/5")
       const authToken = await this.prisma.authToken.create({
         data: {
           orderId,
           artworkId,
-          hederaTokenId: `${tokenId}/${mintResult.serialNumbers[0]}`,
+          hederaTokenId: `${tokenId}/${hederaNftSerial}`,
           hederaTxHash: mintResult.transactionId,
           metadataIpfs: metadataUrl,
           mintedBy: 'system'

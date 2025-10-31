@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -10,12 +11,27 @@ import { TestCompleteOrderDto } from './dto/test-complete-order.dto';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('buyer')
   @Post('checkout')
   createCheckout(@Req() req: Request, @Body() dto: CreateOrderDto) {
     const user = req.user as { userId: string };
     return this.ordersService.createCheckout(user.userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('orders/:id')
+  getOrder(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as { userId: string };
+    return this.ordersService.getOrderById(id, user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('buyer')
+  @Get('orders/buyer/me')
+  getMyOrders(@Req() req: Request) {
+    const user = req.user as { userId: string };
+    return this.ordersService.getOrdersByBuyer(user.userId);
   }
 
   // TEST ENDPOINT - Complete order without payment (for testing only)

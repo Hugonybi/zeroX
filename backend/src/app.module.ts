@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { PrismaModule } from '@common/prisma/prisma.module';
@@ -12,6 +14,10 @@ import { QueueModule } from './queue/queue.module';
 import { IpfsModule } from '@modules/ipfs/ipfs.module';
 import { HederaModule } from '@modules/hedera/hedera.module';
 import { TokenizationModule } from '@modules/tokenization/tokenization.module';
+import { AdminModule } from '@modules/admin/admin.module';
+import { ArtistsModule } from '@modules/artists/artists.module';
+import { CartModule } from '@modules/cart/cart.module';
+import { WishlistModule } from '@modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -20,6 +26,13 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
       load: [configuration],
       validationSchema
     }),
+    // Rate limiting: 100 requests per minute per IP (global default)
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 seconds
+        limit: 100, // 100 requests
+      },
+    ]),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -29,7 +42,18 @@ import { TokenizationModule } from '@modules/tokenization/tokenization.module';
     QueueModule,
     IpfsModule,
     HederaModule,
-    TokenizationModule
-  ]
+    TokenizationModule,
+    AdminModule,
+    ArtistsModule,
+    CartModule,
+    WishlistModule
+  ],
+  providers: [
+    // Apply rate limiting globally
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

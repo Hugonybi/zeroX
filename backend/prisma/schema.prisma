@@ -56,11 +56,17 @@ model User {
   name            String
   bio             String?
   kycStatus       KycStatus        @default(none)
+  failedLoginAttempts Int          @default(0)
+  lockedUntil     DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   artworks        Artwork[]
   orders          Order[]          @relation("BuyerOrders")
   ownershipTokens OwnershipToken[]
+  refreshTokens   RefreshToken[]
+  artistProfile   ArtistProfile?
+  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
 }
 
 model Artwork {
@@ -72,16 +78,41 @@ model Artwork {
   type            ArtworkType
   mediaUrl        String
   metadataUrl     String?
-  serialNumber    String?
-  edition         Int?
+  // Artist-defined identifiers (independent of Hedera NFT serials)
+  serialNumber    String?          // Artist's catalog number (e.g., "ART-2024-001", "Limited Edition 5/10")
+  edition         Int?             // Edition number if part of a series (e.g., 5 of 10)
   priceCents      Int
   currency        String
   status          ArtworkStatus    @default(draft)
+  
+  // Enhanced fields for MVP shopping experience
+  medium          String?
+  category        String?
+  tags            String[]         @default([])
+  yearCreated     Int?
+  dimensionHeight Float?
+  dimensionWidth  Float?
+  dimensionDepth  Float?
+  dimensionUnit   String?          @default("cm")
+  
+  // Inventory management
+  isUnique        Boolean          @default(true)
+  totalQuantity   Int              @default(1)
+  availableQuantity Int            @default(1)
+  reservedQuantity  Int            @default(0)
+  
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   orders          Order[]
   authTokens      AuthToken[]
   ownershipTokens OwnershipToken[]
+  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
+  
+  @@index([status])
+  @@index([artistId])
+  @@index([priceCents])
+  @@index([category])
 }
 
 model Order {
@@ -96,10 +127,27 @@ model Order {
   paymentStatus  PaymentStatus   @default(pending)
   orderStatus    OrderStatus     @default(created)
   reference      String          @unique
+  
+  // Enhanced checkout fields
+  quantity       Int             @default(1)
+  unitPriceCents Int?
+  shippingCents  Int             @default(0)
+  taxCents       Int             @default(0)
+  totalCents     Int?
+  
+  // Shipping information
+  shippingAddress Json?
+  shippingMethod  String?
+  trackingNumber  String?
+  
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   authToken      AuthToken?
   ownershipToken OwnershipToken?
+  
+  @@index([buyerId])
+  @@index([artworkId])
+  @@index([orderStatus])
 }
 
 model AuthToken {
@@ -108,9 +156,9 @@ model AuthToken {
   artworkId       String
   order           Order           @relation(fields: [orderId], references: [id])
   orderId         String          @unique
-  hederaTokenId   String
-  hederaTxHash    String
-  metadataIpfs    String
+  hederaTokenId   String          // Format: "CollectionID/Serial" (e.g., "0.0.7145131/5")
+  hederaTxHash    String          // Hedera transaction hash
+  metadataIpfs    String          // IPFS URL containing certificate metadata
   mintedBy        String
   mintedAt        DateTime        @default(now())
   ownershipTokens OwnershipToken[]
@@ -126,11 +174,11 @@ model OwnershipToken {
   orderId              String     @unique
   authenticityToken    AuthToken  @relation(fields: [authenticityTokenId], references: [id])
   authenticityTokenId  String
-  hederaTokenId        String
-  hederaTxHash         String
-  metadataIpfs         String
+  hederaTokenId        String     // Format: "CollectionID/Serial" (e.g., "0.0.7141105/5")
+  hederaTxHash         String     // Hedera transaction hash
+  metadataIpfs         String     // IPFS URL with ownership metadata (includes artwork serial)
   transferable         Boolean    @default(true)
-  fractions            Int        @default(1)
+  fractions            Int        @default(1)  // For future fractionalization
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 }
@@ -142,4 +190,77 @@ model AuditLog {
   action     String
   metaJson   Json
   createdAt  DateTime @default(now())
+}
+
+model RefreshToken {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  token        String   @unique
+  isRevoked    Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  revokedAt    DateTime?
+  replacedBy   String?  // Token ID that replaced this one (for rotation tracking)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model ArtistProfile {
+  id            String   @id @default(uuid())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String   @unique
+  displayName   String?
+  bio           String?
+  profileImage  String?
+  
+  // Social and professional links
+  website       String?
+  instagram     String?
+  twitter       String?
+  
+  // Professional information
+  education     String?
+  exhibitions   String[]  @default([])
+  awards        String[]  @default([])
+  
+  // Platform statistics
+  totalSales    Int       @default(0)
+  averageRating Float?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([userId])
+}
+
+model CartItem {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  artwork        Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artworkId      String
+  purchaseOption Json?    // Physical/Digital preference and other options
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artworkId String
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
 }

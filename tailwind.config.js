@@ -35,6 +35,10 @@ export default {
       transitionTimingFunction: {
         snap: "cubic-bezier(0.2, 0.8, 0.2, 1)",
       },
+      aspectRatio: {
+        "4/3": "4 / 3",
+        "4/5": "4 / 5",
+      },
     },
     container: {
       center: true,

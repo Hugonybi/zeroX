@@ -5,6 +5,7 @@ import { API_BASE_URL, USE_MOCK_ARTWORKS } from "../config/api";
 import { createHttpClient } from "../lib/http";
 import type { Artwork } from "../types/artwork";
 import { mockArtworks } from "../data/mockArtworks";
+import { ArtworkImage } from "../components/ArtworkImage";
 
 const httpClient = createHttpClient(API_BASE_URL);
 
@@ -65,7 +66,11 @@ export function ArtworkDetailPage() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-sm text-ink-muted">
+        Loading artwork...
+      </div>
+    );
   }
 
   if (!artwork) {
@@ -73,24 +78,49 @@ export function ArtworkDetailPage() {
   }
 
   return (
-    <section className="space-y-12">
-      <Link to="/" className="text-xs font-semibold uppercase tracking-[0.3em] text-ink-muted transition-colors hover:text-ink">
-        ← Back to gallery
-      </Link>
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-4 py-2 text-xs font-semibold text-ink transition-colors hover:border-ink/20 hover:bg-ink/5"
+        >
+          <span aria-hidden className="text-base leading-none">←</span>
+          Back to Gallery
+        </Link>
+      </div>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
-        <div className="aspect-4/5 w-full rounded-3xl bg-stone/40 shadow-brand">
-          {artwork.mediaUrl ? (
-            <img src={artwork.mediaUrl} alt={artwork.title} className="h-full w-full object-cover" />
-          ) : null}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="flex flex-col gap-10">
+          <ArtworkImage
+            src={artwork.mediaUrl}
+            alt={artwork.title}
+            maxWidth={700}
+            minWidth={400}
+            aspectRatio="3/4"
+          />
         </div>
-        <ArtworkDetails
-          editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}
-          title={artwork.title}
-          artist={artwork.artistName ?? "Unknown artist"}
-          price={formatPrice(artwork.priceCents, artwork.currency)}
-          tokenId={`0.0.${artwork.id.slice(-4)}`}
-        />
+
+        <div className="flex flex-col gap-8">
+          <div className="bg-white p-8 flex flex-col gap-4 rounded-lg shadow-sm">
+            <ArtworkDetails
+              artworkId={artwork.id}
+              editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}
+              title={artwork.title}
+              artist={artwork.artistName ?? artwork.artist?.name ?? "Unknown artist"}
+              price={formatPrice(artwork.priceCents, artwork.currency)}
+              tokenId={`0.0.${artwork.id.slice(-4)}`}
+              status={artwork.status}
+              artwork={artwork}
+            />
+          </div>
+
+          {/* <aside className="rounded-[28px] border border-ink/10 bg-white/80 p-8 shadow-sm backdrop-blur-sm">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.28em] text-ink-muted">Specifications</h3>
+            <div className="mt-4 text-sm text-ink">
+              <ArtworkSpecifications artwork={artwork} showFullDetails />
+            </div>
+          </aside> */}
+        </div>
       </div>
     </section>
   );

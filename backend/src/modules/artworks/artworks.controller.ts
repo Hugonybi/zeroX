@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { Roles } from '@common/decorators/roles.decorator';
+import { RolesGuard } from '@common/guards/roles.guard';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
@@ -10,7 +11,7 @@ import { ArtworksService } from './artworks.service';
 export class ArtworksController {
   constructor(private readonly artworksService: ArtworksService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('artist')
   @Post()
   create(@Req() req: Request, @Body() dto: CreateArtworkDto) {
@@ -18,7 +19,7 @@ export class ArtworksController {
     return this.artworksService.create(user.userId, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('artist')
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateArtworkDto) {
@@ -34,6 +35,12 @@ export class ArtworksController {
 @Controller('artworks')
 export class MarketplaceController {
   constructor(private readonly artworksService: ArtworksService) {}
+
+  @Get('search')
+  search(@Query() searchDto: any) {
+    // Import and use SearchArtworksDto for proper validation
+    return this.artworksService.searchArtworks(searchDto);
+  }
 
   @Get()
   browse(

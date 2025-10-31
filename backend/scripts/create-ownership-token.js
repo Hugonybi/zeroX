@@ -3,9 +3,14 @@
 /**
  * Hedera Ownership Token Creation Script
  * 
- * This script creates a TRANSFERABLE NFT token on Hedera testnet that represents
+ * This script creates a TRANSFERABLE NFT token COLLECTION on Hedera testnet that represents
  * legal ownership of physical/digital artworks. These tokens are minted frozen
  * by default and can be unfrozen when buyers connect their Hedera wallets.
+ * 
+ * IMPORTANT: This creates a COLLECTION, not individual NFTs
+ * - Each artwork purchase will mint a new NFT with an auto-incremented serial (1, 2, 3, etc.)
+ * - The serial number is assigned by Hedera and indicates mint order across ALL artworks
+ * - This is separate from any artist-defined edition numbers or catalog IDs
  * 
  * Key differences from authenticity tokens:
  * - Has freeze key (control transfers)
@@ -68,8 +73,8 @@ async function createOwnershipToken() {
   try {
     // Create the ownership NFT token with advanced key controls
     const tokenCreateTx = new TokenCreateTransaction()
-      .setTokenName('Hedera Art Ownership Certificates')
-      .setTokenSymbol('HAOC')
+      .setTokenName('zeroX Ownership Certificates')
+      .setTokenSymbol('zeroX')
       .setTokenType(TokenType.NonFungibleUnique)
       .setDecimals(0)
       .setInitialSupply(0)
@@ -91,8 +96,10 @@ async function createOwnershipToken() {
     const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     const tokenId = tokenCreateRx.tokenId;
 
-    console.log(`✅ Ownership NFT Token created successfully!`);
+    console.log(`✅ Ownership NFT Token Collection created successfully!`);
     console.log(`Token ID: ${tokenId}`);
+    console.log(`\n📝 This is a TOKEN COLLECTION, not an individual NFT.`);
+    console.log(`   Each artwork purchase will mint a new NFT with serial /1, /2, /3, etc.`);
     console.log(`\nToken Properties:`);
     console.log(`  - Type: Non-Fungible Unique (NFT)`);
     console.log(`  - Supply Type: Infinite`);
@@ -100,7 +107,7 @@ async function createOwnershipToken() {
     console.log(`  - Transferable: Yes (after unfreezing)`);
     console.log(`\nAdd this to your .env file:`);
     console.log(`HEDERA_OWNERSHIP_TOKEN_ID="${tokenId}"`);
-    console.log(`\nYou can view your token at:`);
+    console.log(`\nYou can view your token collection at:`);
     console.log(`https://hashscan.io/testnet/token/${tokenId}`);
     console.log(`\n⚠️  Important:`);
     console.log(`  - Tokens will be minted to treasury in frozen state`);

@@ -3,6 +3,31 @@
 **Test Date:** October 26, 2025  
 **Branch:** `linkWithBackend`
 
+## Authentication Flow
+
+The application now uses cookie-based JWT authentication:
+
+### Backend Endpoints
+- `POST /auth/register` - Register new user, sets HTTP-only cookies
+- `POST /auth/login` - Login user, sets HTTP-only cookies  
+- `POST /auth/refresh` - Refresh access token using refresh cookie
+- `POST /auth/logout` - Clear auth cookies
+- `GET /users/me` - Get current user profile (requires auth)
+
+### Frontend Implementation
+- Cookie-based auth (no localStorage JWT exposure)
+- Automatic token refresh on 401 responses
+- Protected routes with role-based access
+- Auth context provider managing global auth state
+- Login/Register forms with validation
+- Profile page for user management
+
+### Test Authentication
+1. Visit `http://localhost:5174/register` to create an account
+2. Or use the Dev Auth Banner (bottom-right) to auto-generate a test artist account
+3. Protected routes (`/artists`, `/admin`, `/certificate/*`) require authentication
+4. Profile page at `/profile` shows user information
+
 ## Backend API Tests ✅
 
 ### 1. Artist Registration

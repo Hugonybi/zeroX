@@ -35,24 +35,23 @@ export type ButtonProps = ButtonAsButtonProps | ButtonAsAnchorProps;
 /* ---------------- VARIANT STYLES ---------------- */
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#59E17C] text-[#101010] hover:bg-[#2EB257] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2EB257]",
+    "bg-neutral-900 text-white hover:bg-neutral-900 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#2EB257]",
   secondary:
-    "bg-[#DFFFD9] text-[#0C0C0C] hover:bg-[#59E17C]/80 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#59E17C]",
+    "bg-neutral-300 text-white hover:bg-red-900/80 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#59E17C]",
   ghost:
-    "bg-transparent text-[#0C0C0C] hover:bg-[#1010100D] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10101066]",
+    "bg-transparent text-neutral-900 hover:bg-[#1010100D] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#10101066]",
 };
 
 /* ---------------- SIZE STYLES ---------------- */
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-5 py-2.5 text-sm",
-  lg: "px-6 py-3 text-base",
+  sm: "px-3 py-2.5 text-xs min-h-11",
+  md: "px-5 py-3 text-sm min-h-11",
+  lg: "px-6 py-3.5 text-base min-h-12",
 };
 
 /* ---------------- BASE STYLES ---------------- */
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold uppercase tracking-wide transition-all duration-200 ease-snap shadow-[0_6px_0_rgba(16,16,16,0.8)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-[0_2px_0_rgba(16,16,16,0.8)] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none";
-
+  "inline-flex items-center justify-center gap-2 rounded-lg min-px-10 font-semibold uppercase tracking-wide transition-all duration-200 ease-snap  hover:-translate-y-0.5 active:translate-y-0  disabled:cursor-not-allowed disabled:opacity-60 ";
 /* ---------------- COMPONENT ---------------- */
 type ButtonRef = HTMLButtonElement | HTMLAnchorElement;
 
