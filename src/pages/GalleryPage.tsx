@@ -4,8 +4,6 @@ import { ArtworkCard } from "../components/ArtworkCard";
 import { GalleryHero } from "../components/GalleryHero";
 import { Button } from "../components/ui/Button";
 import { useArtworks } from "../hooks/useArtworks";
-import { FilterPanel } from "../features/search/components/FilterPanel";
-import { SortControls } from "../features/search/components/SortControls";
 import { useSearch } from "../features/search/hooks/useSearch";
 import type { SearchFilters, SortOption } from "../features/search/types";
 import { isSortOption } from "../features/search/types";
@@ -29,7 +27,6 @@ export function GalleryPage() {
     ],
     artworkType: (searchParams.get("type") as 'all' | 'physical' | 'digital') || 'all',
   });
-  const [showFilters, setShowFilters] = useState(false);
 
   const normalizedQuery = searchQuery.trim();
 
@@ -77,14 +74,6 @@ export function GalleryPage() {
     setSearchQuery(query);
   };
 
-  const handleFiltersChange = (newFilters: SearchFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleSortChange = (newSort: SortOption) => {
-    setSortBy(newSort);
-  };
-
   const handleResetFilters = () => {
     setSearchQuery("");
     setSortBy("date_desc");
@@ -102,6 +91,7 @@ export function GalleryPage() {
         artist: artwork.artistName ?? artwork.artist?.name ?? "Unknown artist",
         price: formatPrice(artwork.priceCents, artwork.currency),
         imageUrl: artwork.mediaUrl,
+        artwork: artwork, // Pass the full artwork object for wishlist functionality
       })),
     [currentArtworks]
   );
@@ -182,14 +172,17 @@ export function GalleryPage() {
           Array.from({ length: 4 }).map((_, index) => <ArtworkSkeleton key={`artwork-skeleton-${index}`} />)}
 
         {displayArtworks.map((artwork) => (
-          <Link key={artwork.id} to={`/artworks/${artwork.id}`} className="group">
-            <ArtworkCard
-              title={artwork.title}
-              artist={artwork.artist}
-              price={artwork.price}
-              imageUrl={artwork.imageUrl}
-            />
-          </Link>
+          <div key={artwork.id} className="group">
+            <Link to={`/artworks/${artwork.id}`}>
+              <ArtworkCard
+                title={artwork.title}
+                artist={artwork.artist}
+                price={artwork.price}
+                imageUrl={artwork.imageUrl}
+                artwork={artwork.artwork}
+              />
+            </Link>
+          </div>
         ))}
       </div>
     </section>

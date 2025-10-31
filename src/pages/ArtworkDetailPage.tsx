@@ -1,12 +1,10 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArtworkDetails } from "../components/ArtworkDetails";
-import { ArtworkSpecifications } from "../features/artwork/components/ArtworkSpecifications";
 import { API_BASE_URL, USE_MOCK_ARTWORKS } from "../config/api";
 import { createHttpClient } from "../lib/http";
 import type { Artwork } from "../types/artwork";
 import { mockArtworks } from "../data/mockArtworks";
-import { ArtworkDescription } from "../components/ArtworkDescription";
 import { ArtworkImage } from "../components/ArtworkImage";
 
 const httpClient = createHttpClient(API_BASE_URL);
@@ -80,7 +78,7 @@ export function ArtworkDetailPage() {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <Link
           to="/"
@@ -91,22 +89,19 @@ export function ArtworkDetailPage() {
         </Link>
       </div>
 
-      <div className="flex lg:flex-row flex-col gap-8 ">
-        <div className="flex flex-col gap-10 ">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="flex flex-col gap-10">
           <ArtworkImage
             src={artwork.mediaUrl}
             alt={artwork.title}
             maxWidth={700}
+            minWidth={400}
             aspectRatio="3/4"
           />
-
         </div>
 
-        <div className="flex flex-col gap-8 lg:ml-auto lg:max-w-md">
-          {/* <ArtworkDescription description={artwork.description} /> */}
-
-          <div className="bg-white p-8 flex flex-col gap-4">
-
+        <div className="flex flex-col gap-8">
+          <div className="bg-white p-8 flex flex-col gap-4 rounded-lg shadow-sm">
             <ArtworkDetails
               artworkId={artwork.id}
               editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}

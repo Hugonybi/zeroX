@@ -16,6 +16,8 @@ import { HederaModule } from '@modules/hedera/hedera.module';
 import { TokenizationModule } from '@modules/tokenization/tokenization.module';
 import { AdminModule } from '@modules/admin/admin.module';
 import { ArtistsModule } from '@modules/artists/artists.module';
+import { CartModule } from '@modules/cart/cart.module';
+import { WishlistModule } from '@modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -42,7 +44,9 @@ import { ArtistsModule } from '@modules/artists/artists.module';
     HederaModule,
     TokenizationModule,
     AdminModule,
-    ArtistsModule
+    ArtistsModule,
+    CartModule,
+    WishlistModule
   ],
   providers: [
     // Apply rate limiting globally

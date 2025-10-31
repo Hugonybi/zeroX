@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
-import { PurchaseOptionCard } from "./ui/PurchaseOptionCard";
 import { QuantitySelector } from "../features/artwork/components/QuantitySelector";
+import { AddToCartButton } from "./AddToCartButton";
+import { WishlistButton } from "./WishlistButton";
 import { useAuth } from "../features/auth/hooks";
 import type { Artwork } from "../types/artwork";
 
@@ -21,7 +22,7 @@ interface ArtworkDetailsProps {
 export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, tokenId, status, artwork }: ArtworkDetailsProps) {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const [purchaseOption, setPurchaseOption] = useState<'both' | 'digital'>('both');
+  const [purchaseOption] = useState<'both' | 'digital'>('both');
   const [quantity, setQuantity] = useState(1);
   
   const isSoldOut = status === 'sold' || (artwork && artwork.availableQuantity !== undefined && artwork.availableQuantity <= 0);
@@ -105,14 +106,32 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
           />
         </div>
       </div> */}
-      <div>
-        <Button 
-          variant="primary" 
-          onClick={handleBuyNow}
-          disabled={isSoldOut}
-        >
-          {isSoldOut ? 'Sold Out' : 'Buy Now'}
-        </Button>
+      <div className="space-y-3">
+        <div className="flex gap-3">
+          <Button 
+            variant="primary" 
+            onClick={handleBuyNow}
+            disabled={isSoldOut}
+            className="flex-1"
+          >
+            {isSoldOut ? 'Sold Out' : 'Buy Now'}
+          </Button>
+          {artwork && (
+            <WishlistButton 
+              artwork={artwork}
+              size="md"
+              className="px-4"
+            />
+          )}
+        </div>
+        {artwork && !isSoldOut && (
+          <AddToCartButton 
+            artwork={artwork}
+            purchaseOption={purchaseOption === 'both' ? 'physical' : 'digital'}
+            variant="secondary"
+            className="w-full"
+          />
+        )}
       </div>
     </section>
   );

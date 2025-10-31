@@ -55,3 +55,43 @@ export interface CheckoutResponse {
     reference: string;
   };
 }
+
+// Cart checkout types
+export interface CartCheckoutRequest {
+  paymentProvider: PaymentProvider;
+  shippingAddress?: ShippingAddress;
+  shippingMethod?: string;
+}
+
+export interface CartCheckoutResponse {
+  orders: Order[];
+  sessionId: string;
+  payment?: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
+  };
+  totalAmount: number;
+  currency: string;
+}
+
+export interface ConsolidatedOrderStatus {
+  sessionId: string;
+  orders: OrderWithStatus[];
+  totalOrders: number;
+  successfulOrders: number;
+  failedOrders: number;
+  overallStatus: 'processing' | 'completed' | 'partial_failure' | 'failed';
+  createdAt: string;
+}
+
+export interface OrderWithStatus extends Order {
+  artwork?: {
+    id: string;
+    title: string;
+    artistName: string;
+    mediaUrl: string;
+    type: string;
+  };
+  error?: string;
+}

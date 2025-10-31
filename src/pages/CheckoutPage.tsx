@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { createHttpClient } from "../lib/http";
 import { API_BASE_URL, USE_MOCK_ARTWORKS } from "../config/api";
 import type { Artwork } from "../types/artwork";
-import { ArtworkSpecifications } from "../features/artwork/components/ArtworkSpecifications";
 import type { ShippingAddress } from "../types/order";
-import { QuantitySelector } from "../features/artwork/components/QuantitySelector";
 import { useCheckout } from "../hooks/useCheckout";
 import { TextField } from "../components/ui/TextField";
 import { Button } from "../components/ui/Button";
 import { mockArtworks } from "../data/mockArtworks";
+import { OrderSummary } from "../features/checkout/components/OrderSummary";
 
 const httpClient = createHttpClient(API_BASE_URL);
 
@@ -125,11 +124,9 @@ export function CheckoutPage() {
   };
 
   return (
-    <section className="space-y-8">
-      <Link to="/" className="text-xs font-semibold uppercase tracking-[0.3em] text-ink-muted">← Back to gallery</Link>
-
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="space-y-6">
+    <section className="space-y-8 flex justify-center mx-auto">
+      <div className="flex flex-col gap-8 justify-center ">
+        {/* <div className="space-y-6">
           <div className="aspect-4/5 w-full rounded-3xl overflow-hidden bg-stone/40">
             {artwork.mediaUrl && <img src={artwork.mediaUrl} alt={artwork.title} className="w-full h-full object-cover" />}
           </div>
@@ -138,55 +135,48 @@ export function CheckoutPage() {
             <h3 className="text-lg font-semibold mb-4">Specifications</h3>
             <ArtworkSpecifications artwork={artwork} showFullDetails />
           </div>
-        </div>
+        </div> */}
+        {/* <Button variant="secondary" onClick={() => navigate(-1)} className="text-xs font-semibold uppercase tracking-[0.3em] text-ink-muted hover:text-ink transition-colors">← Back</Button> */}
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg border p-6">
-            <h3 className="text-lg font-semibold mb-4">Order summary</h3>
-            <div className="flex justify-between">
-              <div className="text-sm text-gray-600">{artwork.title}</div>
-              <div className="font-semibold">{formatPrice(unitPrice, artwork.currency)}</div>
-            </div>
+        <div className=" w-fit flex flex-col mx-auto lg:flex-row-reverse gap- justify-center">
+          <OrderSummary
+            artwork={artwork}
+            quantity={quantity}
 
-            <div className="mt-4">
-              <QuantitySelector artwork={artwork} quantity={quantity} onQuantityChange={setQuantity} />
-            </div>
+            shippingMethod={purchaseOption === 'digital' ? undefined : 'standard'}
+            onQuantityChange={setQuantity}
+          />
 
-            <div className="mt-4 border-t pt-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal, artwork.currency)}</span></div>
-              <div className="flex justify-between"><span>Shipping</span><span>{formatPrice(shippingCents, artwork.currency)}</span></div>
-              <div className="flex justify-between font-bold"><span>Total</span><span>{formatPrice(total, artwork.currency)}</span></div>
-            </div>
-          </div>
-
-          {purchaseOption !== 'digital' && (
-            <div className="bg-white rounded-lg border p-6">
-              <h3 className="text-lg font-semibold mb-4">Shipping information</h3>
-              <div className="grid gap-3">
-                <TextField value={shippingAddress.fullName} onChange={(e) => handleShippingChange('fullName', e.target.value)} placeholder="Full name" />
-                <TextField value={shippingAddress.addressLine1} onChange={(e) => handleShippingChange('addressLine1', e.target.value)} placeholder="Address line 1" />
-                <TextField value={shippingAddress.addressLine2} onChange={(e) => handleShippingChange('addressLine2', e.target.value)} placeholder="Address line 2 (optional)" />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField value={shippingAddress.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="City" />
-                  <TextField value={shippingAddress.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder="State" />
+          <div className="flex mt-10 flex-col gap-4">
+            {purchaseOption !== 'digital' && (
+              <div className="bg-white rounded-lg border border-neutral-100 p-6">
+                <h3 className="text-lg font-semibold mb-4">Shipping information</h3>
+                <div className="grid gap-3">
+                  <TextField value={shippingAddress.fullName} onChange={(e) => handleShippingChange('fullName', e.target.value)} placeholder="Full name" />
+                  <TextField value={shippingAddress.addressLine1} onChange={(e) => handleShippingChange('addressLine1', e.target.value)} placeholder="Address line 1" />
+                  <TextField value={shippingAddress.addressLine2} onChange={(e) => handleShippingChange('addressLine2', e.target.value)} placeholder="Address line 2 (optional)" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <TextField value={shippingAddress.city} onChange={(e) => handleShippingChange('city', e.target.value)} placeholder="City" />
+                    <TextField value={shippingAddress.state} onChange={(e) => handleShippingChange('state', e.target.value)} placeholder="State" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <TextField value={shippingAddress.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="Postal code" inputMode="numeric" />
+                    <TextField value={shippingAddress.country} onChange={(e) => handleShippingChange('country', e.target.value)} placeholder="Country" />
+                  </div>
+                  <TextField value={shippingAddress.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="Phone (optional)" inputMode="tel" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField value={shippingAddress.postalCode} onChange={(e) => handleShippingChange('postalCode', e.target.value)} placeholder="Postal code" inputMode="numeric" />
-                  <TextField value={shippingAddress.country} onChange={(e) => handleShippingChange('country', e.target.value)} placeholder="Country" />
-                </div>
-                <TextField value={shippingAddress.phone} onChange={(e) => handleShippingChange('phone', e.target.value)} placeholder="Phone (optional)" inputMode="tel" />
               </div>
+            )}
+
+            {localError && <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{localError}</div>}
+            {error && <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{error}</div>}
+
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => navigate(-1)}>Back</Button>
+              <Button variant="primary" onClick={handlePay} loading={isLoading}>
+                Pay {formatPrice(total, artwork.currency)}
+              </Button>
             </div>
-          )}
-
-          {localError && <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{localError}</div>}
-          {error && <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{error}</div>}
-
-          <div className="flex gap-3">
-            <Button variant="secondary" onClick={() => navigate(-1)}>Back</Button>
-            <Button variant="primary" onClick={handlePay} loading={isLoading}>
-              Pay {formatPrice(total, artwork.currency)}
-            </Button>
           </div>
         </div>
       </div>
@@ -195,10 +185,12 @@ export function CheckoutPage() {
 }
 
 function NavigateToHome() {
+  const navigate = useNavigate();
+  
   return (
     <div className="py-12 text-center">
       <p className="text-sm text-gray-600">No artwork selected for checkout.</p>
-      <Link to="/" className="mt-4 inline-block text-blue-600 underline">Back to gallery</Link>
+      <Button onClick={() => navigate(-1)} className="mt-4 inline-block text-blue-600 underline">Back to previous page</Button>
     </div>
   );
 }

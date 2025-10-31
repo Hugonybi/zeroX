@@ -55,10 +55,6 @@ interface AdminNavLinkProps {
 }
 
 function AdminNavLink({ to, label }: AdminNavLinkProps) {
-  // Fix: Use NavLink from react-router-dom for proper SPA navigation
-  // Using <a href> causes full page reload and can lose state
-  const { NavLink } = require('react-router-dom');
-  
   return (
     <NavLink
       to={to}

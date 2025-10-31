@@ -6,6 +6,7 @@ import { PrismaModule } from '@common/prisma/prisma.module';
 import { UsersModule } from '@modules/users/users.module';
 import { ArtworksModule } from '@modules/artworks/artworks.module';
 import { OrdersModule } from '@modules/orders/orders.module';
+import { QueueModule } from '../../queue/queue.module';
 import { MintQueueName } from '../../queue/queue.constants';
 
 @Module({
@@ -14,6 +15,7 @@ import { MintQueueName } from '../../queue/queue.constants';
     UsersModule,
     ArtworksModule,
     OrdersModule,
+    QueueModule,
     BullModule.registerQueue({
       name: MintQueueName,
     }),

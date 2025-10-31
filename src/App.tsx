@@ -9,6 +9,9 @@ import { ArtistProfilePage } from "./pages/ArtistProfilePage";
 import { ArtworkDetailPage } from "./pages/ArtworkDetailPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { CheckoutPage } from "./pages/CheckoutPage";
+import { CartCheckoutPage } from "./pages/CartCheckoutPage";
+import { ConsolidatedOrderStatusPage } from "./pages/ConsolidatedOrderStatusPage";
+import { WishlistPage } from "./pages/WishlistPage";
 import { CertificatePage } from "./pages/CertificatePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -19,6 +22,13 @@ import { PurchaseHistoryPage } from "./pages/PurchaseHistoryPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthDebug } from "./components/AuthDebug";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { CartProvider } from "./features/cart/CartContext";
+import { WishlistProvider } from "./features/wishlist/WishlistContext";
+import { CartErrorBoundary } from "./features/cart/CartErrorBoundary";
+import { WishlistErrorBoundary } from "./features/wishlist/WishlistErrorBoundary";
+import { CartNotificationProvider } from "./features/cart/CartNotifications";
+import { WishlistNotificationProvider } from "./features/wishlist/WishlistNotifications";
+import { CartExpirationWarning } from "./components/CartExpirationWarning";
 
 function NotFound() {
   return (
@@ -33,10 +43,20 @@ function NotFound() {
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        {/* Debug component - remove in production */}
-        {import.meta.env.DEV && <AuthDebug />}
-        <Routes>
+      <CartNotificationProvider>
+        <WishlistNotificationProvider>
+          <CartErrorBoundary>
+            <WishlistErrorBoundary>
+              <CartProvider>
+                <WishlistProvider>
+                  <BrowserRouter>
+                    {/* Debug component - remove in production */}
+                    {import.meta.env.DEV && <AuthDebug />}
+                    
+                    {/* Cart expiration warning */}
+                    <CartExpirationWarning />
+                    
+                    <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -44,6 +64,30 @@ function App() {
           <Route index element={<GalleryPage />} />
           <Route path="artworks/:artworkId" element={<ArtworkDetailPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
+          <Route 
+            path="cart-checkout" 
+            element={
+              <ProtectedRoute>
+                <CartCheckoutPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="cart-orders/:sessionId" 
+            element={
+              <ProtectedRoute>
+                <ConsolidatedOrderStatusPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="wishlist" 
+            element={
+              <ProtectedRoute>
+                <WishlistPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="artists/:artistId" element={<ArtistProfilePage />} />
           <Route
             path="artists"
@@ -105,8 +149,14 @@ function App() {
             element={<NotFound />}
           />
         </Route>
-      </Routes>
-    </BrowserRouter>
+                    </Routes>
+                  </BrowserRouter>
+                </WishlistProvider>
+              </CartProvider>
+            </WishlistErrorBoundary>
+          </CartErrorBoundary>
+        </WishlistNotificationProvider>
+      </CartNotificationProvider>
     </ErrorBoundary>
   );
 }

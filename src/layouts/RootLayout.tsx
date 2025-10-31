@@ -1,9 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { SiteHeader } from "../components/SiteHeader";
 import { DevAuthBanner } from "../components/DevAuthBanner";
+import { CartSidebar } from "../components/CartSidebar";
+import { CartExpirationWarning } from "../components/CartExpirationWarning";
 
 export function RootLayout() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
   // Prevent a flash of the wrong (fallback) font by hiding content
   // until the webfonts declared in CSS have loaded. This uses the
   // Font Loading API when available and falls back to a short timeout.
@@ -32,13 +36,17 @@ export function RootLayout() {
   return (
     <div className="min-h-screen bg-white text-ink">
       <div className="container mx-auto flex min-h-screen flex-col px-6 pb-16 sm:px-1 lg:px-16">
-        <SiteHeader />
+        <SiteHeader onToggleCart={() => setIsCartOpen(!isCartOpen)} />
+        
+        {/* Cart expiration warning - shows globally when items are expiring */}
+        <CartExpirationWarning className="mt-4" />
 
         <main className="flex-1 py-14">
           <Outlet />
         </main>
       </div>
       
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <DevAuthBanner />
     </div>
   );

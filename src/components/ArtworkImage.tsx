@@ -3,6 +3,8 @@ interface ArtworkImageProps {
   alt: string;
   aspectRatio?: string;
   maxWidth?: number;
+  maxHeight?: number;
+  minWidth?: number;
   className?: string;
   wrapperClassName?: string;
   showPlaceholder?: boolean;
@@ -13,6 +15,8 @@ export function ArtworkImage({
   alt,
   aspectRatio = "3/4",
   maxWidth = 700,
+  maxHeight,
+  minWidth,
   className,
   wrapperClassName,
   showPlaceholder = true,
@@ -26,7 +30,11 @@ export function ArtworkImage({
   return (
     <div
       className={wrapperClassNames}
-      style={{ maxWidth: `${maxWidth}px` }}
+      style={{ 
+        maxWidth: `${maxWidth}px`, 
+        maxHeight: maxHeight ? `${maxHeight}px` : undefined,
+        minWidth: minWidth ? `${minWidth}px` : undefined 
+      }}
     >
       <div 
         className="relative w-full"

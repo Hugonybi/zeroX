@@ -13,12 +13,16 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { QueueService } from '../../queue/queue.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly queueService: QueueService
+  ) {}
 
   @Get('dashboard')
   async getDashboardStats() {
@@ -85,5 +89,15 @@ export class AdminController {
       actionFilter,
       entityTypeFilter
     );
+  }
+
+  @Post('cart/cleanup')
+  async triggerCartCleanup() {
+    const job = await this.queueService.triggerCartCleanup();
+    return {
+      message: 'Cart cleanup job triggered successfully',
+      jobId: job.id,
+      timestamp: new Date().toISOString()
+    };
   }
 }

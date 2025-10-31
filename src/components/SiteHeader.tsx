@@ -2,6 +2,11 @@ import { Link, NavLink } from "react-router-dom";
 import { Badge } from "./ui/Badge";
 import { useAuth } from "../features/auth/hooks";
 import { Button } from "./ui/Button";
+import { CartIcon } from "./CartIcon";
+
+interface SiteHeaderProps {
+  onToggleCart: () => void;
+}
 
 const publicLinks = [
   { to: "/", label: "Store" },
@@ -9,11 +14,12 @@ const publicLinks = [
 
 const authenticatedLinks = [
   { to: "/", label: "Store" },
+  { to: "/wishlist", label: "Wishlist" },
   { to: "/profile", label: "Profile" },
   { to: "/artists", label: "Post Artwork", roles: ['artist'] as string[] },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ onToggleCart }: SiteHeaderProps) {
   const { user, isAuthenticated, signOut } = useAuth();
 
   const getVisibleLinks = () => {
@@ -55,6 +61,7 @@ export function SiteHeader() {
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              <CartIcon onToggleCart={onToggleCart} />
               <div className="flex items-center gap-2">
                 <span className="text-xs text-ink">
                   Welcome, {user?.name}

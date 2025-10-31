@@ -65,6 +65,8 @@ model User {
   ownershipTokens OwnershipToken[]
   refreshTokens   RefreshToken[]
   artistProfile   ArtistProfile?
+  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
 }
 
 model Artwork {
@@ -104,6 +106,8 @@ model Artwork {
   orders          Order[]
   authTokens      AuthToken[]
   ownershipTokens OwnershipToken[]
+  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
   
   @@index([status])
   @@index([artistId])
@@ -229,4 +233,34 @@ model ArtistProfile {
   updatedAt     DateTime  @updatedAt
   
   @@index([userId])
+}
+
+model CartItem {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  artwork        Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artworkId      String
+  purchaseOption Json?    // Physical/Digital preference and other options
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  artworkId String
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
 }
