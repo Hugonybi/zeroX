@@ -6,14 +6,20 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   placeholder?: string;
   debounceMs?: number;
+  initialValue?: string;
 }
 
 export function SearchBar({ 
   onSearch, 
   placeholder = 'Search artworks, artists, or styles...', 
-  debounceMs = 300 
+  debounceMs = 300,
+  initialValue = '',
 }: SearchBarProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,7 +39,7 @@ export function SearchBar({
   };
 
   return (
-    <div className="relative w-full max-w-2xl">
+  <div className="relative w-full max-w-xl">
       <div className="flex gap-2">
         <div className="flex-1">
           <TextField

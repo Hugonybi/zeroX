@@ -13,10 +13,10 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
 
   return (
     <article className="flex flex-col gap-4">
-      <div className="aspect-ratio[4/5] h-80 w-full max-w-sm overflow-hidden rounded-2xl bg-stone/40 shadow-brand">
+  <div className="aspect-4/3 w-full overflow-hidden rounded-3xl border border-charcoal/5 bg-stone/40 shadow-brand">
         {showPlaceholder ? (
           <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-stone/60 via-stone/30 to-white">
-            <span className="font-brand text-xl uppercase tracking-widest text-ink/40">Artwork</span>
+            <span className="font-brand text-2xl uppercase tracking-[0.35em] text-ink/40">Artwork</span>
           </div>
         ) : (
           <img 
@@ -27,12 +27,10 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
           />
         )}
       </div>
-      <header className="space-y-1">
-        <h3 className="max-w-xs text-base font-semibold text-ink">
-          {title}
-        </h3>
-        <p className="text-sm text-ink-muted">by {artist}</p>
-        <p className="text-base text-black/70 font-semibold text-ink">{price}</p>
+      <header className="space-y-1 text-sm">
+        <p className="font-semibold uppercase tracking-[0.25em] text-ink">{price}</p>
+        <h3 className="text-base font-semibold text-ink">{title}</h3>
+        <p className="text-ink-muted">by {artist}</p>
       </header>
     </article>
   );

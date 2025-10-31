@@ -1,11 +1,21 @@
+import type { ChangeEvent } from 'react';
 import { SelectField } from '../../../components/ui/SelectField';
+import { SORT_OPTION_LABELS, SORT_OPTIONS, isSortOption, type SortOption } from '../types';
 
 interface SortControlsProps {
-  value: string;
-  onChange: (sortBy: string) => void;
+  value: SortOption;
+  onChange: (sortBy: SortOption) => void;
 }
 
 export function SortControls({ value, onChange }: SortControlsProps) {
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value: selectedValue } = event.target;
+
+    if (isSortOption(selectedValue)) {
+      onChange(selectedValue);
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="sort" className="text-sm font-medium whitespace-nowrap">
@@ -14,14 +24,14 @@ export function SortControls({ value, onChange }: SortControlsProps) {
       <SelectField
         id="sort"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         className="min-w-[150px]"
       >
-        <option value="date_desc">Newest First</option>
-        <option value="date_asc">Oldest First</option>
-        <option value="price_asc">Price: Low to High</option>
-        <option value="price_desc">Price: High to Low</option>
-        <option value="title_asc">Title: A-Z</option>
+        {SORT_OPTIONS.map((option) => (
+          <option key={option} value={option}>
+            {SORT_OPTION_LABELS[option]}
+          </option>
+        ))}
       </SelectField>
     </div>
   );

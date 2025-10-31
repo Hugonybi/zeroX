@@ -1,5 +1,27 @@
 import type { Artwork } from '../../types/artwork';
 
+export const SORT_OPTIONS = [
+  'date_desc',
+  'date_asc',
+  'price_asc',
+  'price_desc',
+  'title_asc',
+] as const;
+
+export type SortOption = typeof SORT_OPTIONS[number];
+
+export const SORT_OPTION_LABELS: Record<SortOption, string> = {
+  date_desc: 'Newest First',
+  date_asc: 'Oldest First',
+  price_asc: 'Price: Low to High',
+  price_desc: 'Price: High to Low',
+  title_asc: 'Title: A-Z',
+} as const;
+
+export function isSortOption(value: string | null): value is SortOption {
+  return value !== null && (SORT_OPTIONS as readonly string[]).includes(value);
+}
+
 export interface SearchQuery {
   query?: string;
   minPrice?: number;
@@ -7,7 +29,7 @@ export interface SearchQuery {
   type?: 'physical' | 'digital';
   category?: string;
   artistId?: string;
-  sortBy?: 'price_asc' | 'price_desc' | 'date_desc' | 'date_asc' | 'title_asc';
+  sortBy?: SortOption;
   page?: number;
   limit?: number;
 }

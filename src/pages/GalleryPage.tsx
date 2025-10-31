@@ -4,11 +4,11 @@ import { ArtworkCard } from "../components/ArtworkCard";
 import { GalleryHero } from "../components/GalleryHero";
 import { Button } from "../components/ui/Button";
 import { useArtworks } from "../hooks/useArtworks";
-import { SearchBar } from "../features/search/components/SearchBar";
 import { FilterPanel } from "../features/search/components/FilterPanel";
 import { SortControls } from "../features/search/components/SortControls";
 import { useSearch } from "../features/search/hooks/useSearch";
-import type { SearchFilters } from "../features/search/types";
+import type { SearchFilters, SortOption } from "../features/search/types";
+import { isSortOption } from "../features/search/types";
 
 export function GalleryPage() {
   const navigate = useNavigate();
@@ -16,50 +16,63 @@ export function GalleryPage() {
   const { data: artworks, isLoading: isLoadingDefault, error: errorDefault, refetch } = useArtworks();
   const { results, loading: searchLoading, error: searchError, search } = useSearch();
   
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
-  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "date_desc");
+  const initialQuery = searchParams.get("q") || "";
+  const initialSortParam = searchParams.get("sort");
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [sortBy, setSortBy] = useState<SortOption>(
+    isSortOption(initialSortParam) ? initialSortParam : "date_desc"
+  );
   const [filters, setFilters] = useState<SearchFilters>({
     priceRange: [
-      parseInt(searchParams.get("minPrice") || "0"),
-      parseInt(searchParams.get("maxPrice") || "1000000")
+      parseInt(searchParams.get("minPrice") || "0", 10),
+      parseInt(searchParams.get("maxPrice") || "1000000", 10)
     ],
     artworkType: (searchParams.get("type") as 'all' | 'physical' | 'digital') || 'all',
   });
   const [showFilters, setShowFilters] = useState(false);
 
+  const normalizedQuery = searchQuery.trim();
+
   // Determine if we're using search or default browse
-  const isSearching = searchQuery || filters.artworkType !== 'all' || 
-    filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000;
-  
+  const isSearching =
+    normalizedQuery.length > 0 ||
+    filters.artworkType !== 'all' ||
+    filters.priceRange[0] > 0 ||
+    filters.priceRange[1] < 1000000;
+
   const isLoading = isSearching ? searchLoading : isLoadingDefault;
   const error = isSearching ? searchError : errorDefault;
-  
+
   // Use search results or default artworks
-  const currentArtworks = isSearching && results ? results.artworks : artworks;
+  const currentArtworks = useMemo(
+    () => (isSearching && results ? results.artworks : artworks) ?? [],
+    [isSearching, results, artworks]
+  );
 
   // Effect to perform search when query changes
   useEffect(() => {
     if (isSearching) {
       search({
-        query: searchQuery || undefined,
+        query: normalizedQuery || undefined,
         minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
         maxPrice: filters.priceRange[1] < 1000000 ? filters.priceRange[1] : undefined,
         type: filters.artworkType !== 'all' ? filters.artworkType : undefined,
-        sortBy: sortBy as any,
+        sortBy,
       });
     }
-  }, [searchQuery, filters, sortBy, isSearching, search]);
+  }, [normalizedQuery, filters, sortBy, isSearching, search]);
 
   // Update URL params
   useEffect(() => {
     const params = new URLSearchParams();
-    if (searchQuery) params.set("q", searchQuery);
+  if (normalizedQuery) params.set("q", normalizedQuery);
     if (sortBy !== "date_desc") params.set("sort", sortBy);
     if (filters.artworkType !== 'all') params.set("type", filters.artworkType);
     if (filters.priceRange[0] > 0) params.set("minPrice", filters.priceRange[0].toString());
     if (filters.priceRange[1] < 1000000) params.set("maxPrice", filters.priceRange[1].toString());
     setSearchParams(params, { replace: true });
-  }, [searchQuery, sortBy, filters, setSearchParams]);
+  }, [normalizedQuery, sortBy, filters, setSearchParams]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -69,7 +82,7 @@ export function GalleryPage() {
     setFilters(newFilters);
   };
 
-  const handleSortChange = (newSort: string) => {
+  const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort);
   };
 
@@ -95,11 +108,11 @@ export function GalleryPage() {
   );
 
   return (
-    <section className="space-y-10">
+    <section className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 lg:px-0">
       <div className="space-y-6">
-        <GalleryHero />
+        <GalleryHero onSearch={handleSearch} searchQuery={searchQuery} />
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Button onClick={() => navigate("/artists")}>Post artwork</Button>
           <span className="text-xs uppercase tracking-[0.35em] text-ink-muted">
             Share your next release with provenance built in.
@@ -107,27 +120,22 @@ export function GalleryPage() {
         </div>
       </div>
 
-      {/* Search and Filter Section */}
       <div className="space-y-4">
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          <div className="flex-1 w-full lg:w-auto">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-          <div className="flex gap-2 items-center w-full lg:w-auto">
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
             <SortControls value={sortBy} onChange={handleSortChange} />
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setShowFilters((prev) => !prev)}
               className="lg:hidden"
             >
-              {showFilters ? 'Hide' : 'Show'} Filters
+              {showFilters ? "Hide" : "Show"} Filters
             </Button>
           </div>
         </div>
 
-        {/* Filter Panel */}
-        <div className={`${showFilters ? 'block' : 'hidden'} lg:block`}>
+        <div className={`${showFilters ? "block" : "hidden"} lg:block`}>
           <FilterPanel
             filters={filters}
             onFiltersChange={handleFiltersChange}
@@ -135,22 +143,21 @@ export function GalleryPage() {
           />
         </div>
 
-        {/* Active Filters Display */}
         {isSearching && (
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-gray-600">Active filters:</span>
-            {searchQuery && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                Search: {searchQuery}
+            {normalizedQuery && (
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
+                Search: {normalizedQuery}
               </span>
             )}
             {filters.artworkType !== 'all' && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
                 Type: {filters.artworkType}
               </span>
             )}
             {(filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
                 Price: ${filters.priceRange[0] / 100} - ${filters.priceRange[1] / 100}
               </span>
             )}
@@ -160,10 +167,9 @@ export function GalleryPage() {
           </div>
         )}
 
-        {/* Results Count */}
         {results && (
           <div className="text-sm text-gray-600">
-            Found {results.pagination.total} artwork{results.pagination.total !== 1 ? 's' : ''}
+            Found {results.pagination.total} artwork{results.pagination.total !== 1 ? "s" : ""}
           </div>
         )}
       </div>
@@ -183,7 +189,7 @@ export function GalleryPage() {
         </div>
       )}
 
-      <div className="grid gap-10 sm:grid-cols-2 xl:grid-cols-4">
+  <div className="mx-auto grid max-w-5xl bg-red-600 grid-row-4 gap-16 sm:grid-cols-2">
         {isLoading && !displayArtworks.length &&
           Array.from({ length: 4 }).map((_, index) => <ArtworkSkeleton key={`artwork-skeleton-${index}`} />)}
 
