@@ -111,7 +111,7 @@ export function GalleryPage() {
       <GalleryHero onSearch={handleSearch} searchQuery={searchQuery} />
 
       <div className="space-y-6">
-        <div className="flex justify-end">
+        {/* <div className="flex justify-end">
           <Button variant="ghost" size="sm" onClick={() => setShowFilters((prev) => !prev)}>
             {showFilters ? "Hide advanced filters" : "Advanced filters"}
           </Button>
@@ -129,7 +129,7 @@ export function GalleryPage() {
               onReset={handleResetFilters}
             />
           </div>
-        )}
+        )} */}
 
         {isSearching && (
           <div className="flex flex-wrap items-center gap-2">

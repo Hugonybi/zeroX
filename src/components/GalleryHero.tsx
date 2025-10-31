@@ -8,10 +8,10 @@ interface GalleryHeroProps {
 export function GalleryHero({ onSearch, searchQuery }: GalleryHeroProps) {
   return (
     <div className="mx-auto max-w-4xl space-y-5 text-center">
-      <h2 className="font-brand text-4xl sm:text-5xl md:text-[3.25rem] uppercase tracking-[0.25em]">
+      <h2 className="font-brand text-md sm:text-5xl md:text-[3.25rem] uppercase tracking-[0.25em]">
         Discover Art With Provenance
       </h2>
-      <p className="mx-auto max-w-2xl text-sm text-emerald-500">
+      <p className="mx-auto max-w-md text-sm text-emerald-500">
         Browse hand-picked works authenticated on Hedera. Every purchase mints a unique certificate of authenticity—no crypto
         wallets required.
       </p>

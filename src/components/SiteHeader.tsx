@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { Badge } from "./ui/Badge";
 import { useAuth } from "../features/auth/hooks";
+import { Button } from "./ui/Button";
 
 const publicLinks = [
   { to: "/", label: "Store" },
@@ -26,31 +27,16 @@ export function SiteHeader() {
   const links = getVisibleLinks();
 
   return (
-    <header className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-8">
+    <header className="space-y-2 mt-2">
+      <div className="flex items-center justify-between">
+      <div className="flex flex-cols items-center justify-between gap-8">
         <Link to="/" className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-charcoal/20 bg-white font-brand text-2xl">
             ◊
           </span>
           <span className="font-brand text-xl lowercase tracking-[0.3em]">zeroXmods</span>
         </Link>
-              {/* search bar */}
-      <div className="flex flex-wrap items-center justify-between gap-6 ">
-        <label className="flex flex-1 max-w-xl items-center text-xs uppercase tracking-[0.35em] text-ink">
-          <span className="sr-only">Search artworks</span>
-          <input
-            type="search"
-            placeholder="search"
-            className="w-full border-b border-charcoal/40 bg-transparent pb-1 text-xs uppercase tracking-[0.35em] text-ink placeholder:text-charcoal/50 focus:border-ink focus:outline-none"
-          />
-        </label>
-
-        <button
-          type="button"
-          className="text-xs uppercase tracking-[0.35em] text-ink hover:text-emerald-500"
-        >
-          Filter
-        </button>
+      
       </div>
         <nav className="flex flex-wrap items-center gap-8 text-xs font-semibold uppercase tracking-[0.35em] text-ink-muted">
           {links.map(({ to, label }) => (
@@ -87,22 +73,29 @@ export function SiteHeader() {
             </div>
           ) : (
             <>
-              <Link
-                to="/register"
-                className="text-xs font-semibold lowercase tracking-[0.25em] text-violet-500 hover:text-violet-700"
-              >
-                sign up
-              </Link>
-              <Link
-                to="/login"
-                className="text-xs font-semibold lowercase tracking-[0.25em] text-emerald-500 hover:text-emerald-700"
-              >
-                login
-              </Link>
+                <Button
+                  as="a"
+                  href="/register"
+                  variant="secondary"
+                  size="sm"
+                  className=" decoration-0 hover:bg-violet-700"
+                >
+                  sign up
+                </Button>
+                <Button
+                  as="a"
+                  href="/login"
+                  variant="primary"
+                  size="sm"
+                  className="text-white hover:bg-emerald-700"
+                >
+                  login
+                </Button>
             </>
           )}
         </nav>
-      </div>
+        </div>
+      
 
     </header>
   );
