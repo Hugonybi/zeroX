@@ -15,9 +15,14 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "db:seed": "ts-node prisma/seed.ts",
     "setup:token": "node scripts/create-nft-token.js",
     "setup:ownership-token": "node scripts/create-ownership-token.js",
     "create:admin": "node scripts/create-admin-user.js"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@hashgraph/sdk": "^2.41.2",
