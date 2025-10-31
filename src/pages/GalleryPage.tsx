@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { GalleryHero } from "../components/GalleryHero";
@@ -11,7 +11,6 @@ import type { SearchFilters, SortOption } from "../features/search/types";
 import { isSortOption } from "../features/search/types";
 
 export function GalleryPage() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: artworks, isLoading: isLoadingDefault, error: errorDefault, refetch } = useArtworks();
   const { results, loading: searchLoading, error: searchError, search } = useSearch();
@@ -108,40 +107,29 @@ export function GalleryPage() {
   );
 
   return (
-    <section className="mx-auto max-w-6xl space-y-10 px-4 sm:px-6 lg:px-0">
+    <section className="mx-auto max-w-6xl space-y-16 px-4 py-16 sm:px-6 lg:px-0">
+      <GalleryHero onSearch={handleSearch} searchQuery={searchQuery} />
+
       <div className="space-y-6">
-        <GalleryHero onSearch={handleSearch} searchQuery={searchQuery} />
-
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button onClick={() => navigate("/artists")}>Post artwork</Button>
-          <span className="text-xs uppercase tracking-[0.35em] text-ink-muted">
-            Share your next release with provenance built in.
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-4">
         <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-            <SortControls value={sortBy} onChange={handleSortChange} />
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowFilters((prev) => !prev)}
-              className="lg:hidden"
-            >
-              {showFilters ? "Hide" : "Show"} Filters
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => setShowFilters((prev) => !prev)}>
+            {showFilters ? "Hide advanced filters" : "Advanced filters"}
+          </Button>
         </div>
 
-        <div className={`${showFilters ? "block" : "hidden"} lg:block`}>
-          <FilterPanel
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onReset={handleResetFilters}
-          />
-        </div>
+        {showFilters && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <SortControls value={sortBy} onChange={handleSortChange} />
+            </div>
+
+            <FilterPanel
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onReset={handleResetFilters}
+            />
+          </div>
+        )}
 
         {isSearching && (
           <div className="flex flex-wrap items-center gap-2">
@@ -189,7 +177,7 @@ export function GalleryPage() {
         </div>
       )}
 
-  <div className="mx-auto grid max-w-5xl bg-red-600 grid-row-4 gap-16 sm:grid-cols-2">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-y-20 lg:grid-cols-3 gap-x-12 sm:grid-cols-2">
         {isLoading && !displayArtworks.length &&
           Array.from({ length: 4 }).map((_, index) => <ArtworkSkeleton key={`artwork-skeleton-${index}`} />)}
 
@@ -229,7 +217,7 @@ function formatPrice(priceCents: number, currency: string) {
 
 function ArtworkSkeleton() {
   return (
-  <div className="w-full min-h-80 animate-pulse rounded-3xl border border-charcoal/10 bg-white p-5">
+    <div className="w-full min-h-80 animate-pulse rounded-3xl border border-charcoal/10 bg-white p-5">
       <div className="h-40 w-full rounded-2xl bg-charcoal/10" />
       <div className="mt-6 space-y-3">
         <div className="h-3 w-2/3 rounded-full bg-charcoal/10" />

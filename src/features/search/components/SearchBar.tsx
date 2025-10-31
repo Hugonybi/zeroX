@@ -39,15 +39,15 @@ export function SearchBar({
   };
 
   return (
-  <div className="relative w-full max-w-xl">
-      <div className="flex gap-2">
-        <div className="flex-1">
+    <div className="relative w-full  max-w-md">
+      <div className="flex  gap-2">
+        <div className="flex-1 ">
           <TextField
             type="search"
             placeholder={placeholder}
             value={value}
             onChange={handleChange}
-            className="w-full"
+            className="w-full  h-fit p-0 border-0"
           />
         </div>
         {value && (
