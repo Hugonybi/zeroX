@@ -107,7 +107,7 @@ export function GalleryPage() {
   );
 
   return (
-    <section className="mx-auto max-w-6xl space-y-16 px-4 py-16 sm:px-6 lg:px-0">
+    <section className="mx-auto max-w-6xl space-y-16 px-4 py-16 sm:px-0 lg:px-0">
       <GalleryHero onSearch={handleSearch} searchQuery={searchQuery} />
 
       <div className="space-y-6">

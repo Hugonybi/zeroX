@@ -13,7 +13,7 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
 
   return (
     <article className="flex flex-col gap-4">
-      <div className="aspect-4/3 w-78 min-h-88 overflow-hidden bg-stone-500 shadow-brand">
+      <div className="aspect-3/4 w-full overflow-hidden bg-stone-500 shadow-brand">
         {showPlaceholder ? (
           <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-stone/60 via-stone/30 to-white">
             <span className="font-brand text-2xl uppercase tracking-[0.35em] text-ink/40">Artwork</span>

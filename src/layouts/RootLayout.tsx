@@ -31,7 +31,7 @@ export function RootLayout() {
 
   return (
     <div className="min-h-screen bg-white text-ink">
-      <div className="container mx-auto flex min-h-screen flex-col px-6 pb-16 sm:px-10 lg:px-16">
+      <div className="container mx-auto flex min-h-screen flex-col px-6 pb-16 sm:px-1 lg:px-16">
         <SiteHeader />
 
         <main className="flex-1 py-14">

@@ -6,6 +6,8 @@ import { API_BASE_URL, USE_MOCK_ARTWORKS } from "../config/api";
 import { createHttpClient } from "../lib/http";
 import type { Artwork } from "../types/artwork";
 import { mockArtworks } from "../data/mockArtworks";
+import { ArtworkDescription } from "../components/ArtworkDescription";
+import { ArtworkImage } from "../components/ArtworkImage";
 
 const httpClient = createHttpClient(API_BASE_URL);
 
@@ -78,7 +80,7 @@ export function ArtworkDetailPage() {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <Link
           to="/"
@@ -89,30 +91,22 @@ export function ArtworkDetailPage() {
         </Link>
       </div>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)] lg:items-start">
+      <div className="flex lg:flex-row flex-col gap-8 ">
         <div className="flex flex-col gap-10 ">
-          <div className="relative overflow-hidden bg-linear-to-br from-neutral-100 via-neutral-100 to-stone-200 shadow-[0_36px_64px_-32px_rgba(16,16,16,0.4)]">
-            <div className="relative aspect-[4/3] w-full">
-              {artwork.mediaUrl ? (
-                <img src={artwork.mediaUrl} alt={artwork.title} className="h-full w-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-neutral-200 text-sm font-semibold text-ink-muted">
-                  Image coming soon
-                </div>
-              )}
-            </div>
-          </div>
+          <ArtworkImage
+            src={artwork.mediaUrl}
+            alt={artwork.title}
+            maxWidth={700}
+            aspectRatio="3/4"
+          />
 
-          {artwork.description ? (
-            <article className=" bg-white/80 p-8 shadow-sm backdrop-blur-sm">
-              <h3 className="text-base font-semibold text-ink">About this artwork</h3>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted whitespace-pre-wrap">{artwork.description}</p>
-            </article>
-          ) : null}
         </div>
 
         <div className="flex flex-col gap-8 lg:ml-auto lg:max-w-md">
-          <div className="bg-white p-8 ">
+          {/* <ArtworkDescription description={artwork.description} /> */}
+
+          <div className="bg-white p-8 flex flex-col gap-4">
+
             <ArtworkDetails
               artworkId={artwork.id}
               editionLabel={artwork.edition ? `${artwork.edition} of ${artwork.edition}` : "1 of 1"}
