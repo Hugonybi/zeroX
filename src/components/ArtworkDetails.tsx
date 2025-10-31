@@ -57,11 +57,11 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
   return (
     <section className="flex w-full max-w-md flex-col gap-6">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.35em] text-ink-muted">{editionLabel}</p>
-        <h1 className="font-brand text-3xl text-ink">{title}</h1>
+        <p className="text-xs uppercase  text-ink-muted">{editionLabel}</p>
+        <h1 className="text-2xl font-semibold text-ink">{title}</h1>
         {artwork?.artistId ? (
           <Link to={`/artists/${artwork.artistId}`} className="text-sm text-ink hover:underline">
-            by <span className="underline">{artist}</span>
+            by <span className="text-sm">{artist}</span>
           </Link>
         ) : (
           <p className="text-sm text-ink">
@@ -71,9 +71,9 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
         <p className="text-xl font-semibold text-ink">{price}</p>
       </div>
 
-      <Badge tone="info" className="items-baseline gap-1">
-        <span className="text-[0.65rem] uppercase tracking-[0.3em]">Authenticated on Hedera</span>
-        <span className="text-xs font-semibold">Token ID {tokenId}</span>
+      <Badge tone="info" className="items-start flex flex-col bg-teal-50 py-2 gap-1">
+        <span className="text-[0.65rem] uppercase ">Authenticated on Hedera</span>
+        <span className="text-sm font-semibold">Token ID {tokenId}</span>
       </Badge>
 
       {/* Quantity Selector */}
@@ -88,8 +88,8 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
         </div>
       )}
 
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.26em] text-ink-muted">Purchase Option</p>
+      {/* <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase text-ink-muted">Purchase Option</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <PurchaseOptionCard
             title="Physical Art and Digital NFT"
@@ -104,15 +104,16 @@ export function ArtworkDetails({ artworkId, editionLabel, title, artist, price, 
             onClick={() => setPurchaseOption('digital')}
           />
         </div>
+      </div> */}
+      <div>
+        <Button 
+          variant="primary" 
+          onClick={handleBuyNow}
+          disabled={isSoldOut}
+        >
+          {isSoldOut ? 'Sold Out' : 'Buy Now'}
+        </Button>
       </div>
-
-      <Button 
-        variant="primary" 
-        onClick={handleBuyNow}
-        disabled={isSoldOut}
-      >
-        {isSoldOut ? 'Sold Out' : 'Buy Now'}
-      </Button>
     </section>
   );
 }

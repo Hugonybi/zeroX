@@ -29,7 +29,7 @@ export function ArtworkCard({ title, artist, price, imageUrl }: ArtworkCardProps
       </div>
       <header className="space-y-1 text-sm">
         <p className="font-semibold uppercase  text-ink">{price}</p>
-        <h3 className="text-base font-semibold text-ink">{title}</h3>
+        <h3 className="text-sm font-semibold text-ink">{title}</h3>
         <p className="text-ink-muted">by {artist}</p>
       </header>
     </article>
